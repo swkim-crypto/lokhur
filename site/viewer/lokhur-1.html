@@ -1,0 +1,815 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>로후르-1 양수장 · 도면 정합성 3D 검토</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0d1218; --panel:#141b24; --panel2:#1b232e; --rule:#2a3542;
+    --ink:#e7edf4; --ink2:#9aa9b8; --ink3:#657687;
+    --axis:#e0342b; --dim:#3d7fe0; --collect:#22a862; --press:#c04aa6; --timber:#dda52e;
+    --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+    --disp:'Archivo Narrow','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
+    --body:system-ui,-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:var(--body);overflow:hidden}
+  body{display:flex;flex-direction:column}
+  header{flex:0 0 auto;border-bottom:1px solid var(--rule);padding:9px 14px;display:flex;align-items:baseline;gap:13px;flex-wrap:wrap}
+  header h1{margin:0;font-family:var(--disp);font-weight:700;font-size:15px}
+  header .sub{font-family:var(--mono);font-size:10.5px;color:var(--ink3)}
+  header .warn{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--axis);border:1px solid var(--axis);padding:2px 7px}
+  main{flex:1 1 auto;display:flex;min-height:0}
+  #rail{flex:0 0 214px;border-right:1px solid var(--rule);display:flex;flex-direction:column;min-height:0;background:var(--panel)}
+  #rail .cap,#side .cap{padding:8px 11px 6px;font-family:var(--disp);font-size:11px;font-weight:600;letter-spacing:.09em;
+    text-transform:uppercase;color:var(--ink2);border-bottom:1px solid var(--rule)}
+  #side .cap{display:flex;justify-content:space-between}
+  #side .cap u{text-decoration:none;font-family:var(--mono);color:var(--axis)}
+  #stack{flex:1 1 auto;overflow-y:auto;padding:4px 0 12px}
+  .ev{display:grid;grid-template-columns:60px 12px 1fr;align-items:center;gap:6px;padding:3px 9px;cursor:pointer;border-left:2px solid transparent}
+  .ev:hover,.ev.on{background:var(--panel2);border-left-color:var(--axis)}
+  .ev b{font-family:var(--mono);font-size:11.5px;font-weight:500;text-align:right}
+  .ev .tk{height:1px;background:var(--ink3)}
+  .ev.cf .tk{background:var(--axis);height:2px}
+  .ev.cf b{color:var(--axis)}
+  .ev span{font-size:10.5px;color:var(--ink2);line-height:1.25}
+  .ev em{display:block;font-family:var(--mono);font-size:9px;color:var(--ink3);font-style:normal}
+  .grp{padding:10px 11px 3px;font-family:var(--disp);font-size:10px;letter-spacing:.12em;color:var(--ink3);text-transform:uppercase}
+  .grp i{color:var(--axis);font-style:normal}
+  #view{flex:1 1 auto;position:relative;min-width:0}
+  canvas{display:block;width:100%;height:100%}
+  #labels{position:absolute;inset:0;pointer-events:none}
+  .lbl{position:absolute;font-family:var(--mono);font-size:10px;color:var(--ink2);white-space:nowrap;
+    text-shadow:0 0 4px var(--bg),0 0 4px var(--bg)}
+  .lbl.ax{color:var(--axis);font-weight:600;font-size:10.5px}
+  .lbl.rm{color:var(--ink);background:rgba(13,18,24,.74);padding:1px 4px;border:1px solid var(--rule);font-size:9.5px}
+  .lbl.hot{color:#ffd7d4;background:rgba(224,52,43,.3);border:1px solid var(--axis);padding:1px 5px;font-size:9.5px}
+  #modes{position:absolute;top:12px;left:12px;display:flex;border:1px solid var(--rule);background:rgba(13,18,24,.86)}
+  #modes button{appearance:none;background:none;border:0;border-right:1px solid var(--rule);color:var(--ink2);
+    font-family:var(--disp);font-size:11.5px;font-weight:600;padding:7px 12px;cursor:pointer}
+  #modes button:last-child{border-right:0}
+  #modes button.on{background:var(--ink);color:var(--bg)}
+  #modes button:focus-visible{outline:2px solid var(--dim);outline-offset:-2px}
+  #legend{position:absolute;right:12px;bottom:12px;background:rgba(13,18,24,.86);border:1px solid var(--rule);
+    padding:8px 10px;font-family:var(--mono);font-size:9.5px;color:var(--ink2);line-height:1.75}
+  #legend i{display:inline-block;width:16px;height:3px;margin-right:6px;vertical-align:middle}
+  #hint{position:absolute;left:12px;bottom:12px;font-family:var(--mono);font-size:9.5px;color:var(--ink3)}
+  #err{position:absolute;inset:52px 12px auto 12px;border:1px solid var(--axis);background:rgba(224,52,43,.09);
+    padding:12px 14px;font-family:var(--mono);font-size:11px;color:var(--ink);line-height:1.7}
+  #err b{color:var(--axis)}
+  #side{flex:0 0 330px;border-left:1px solid var(--rule);display:flex;flex-direction:column;min-height:0;background:var(--panel)}
+  #list{flex:1 1 auto;overflow-y:auto}
+  .sec{padding:7px 12px 4px;font-family:var(--disp);font-size:10px;letter-spacing:.11em;color:var(--ink3);
+    text-transform:uppercase;background:#111823;border-bottom:1px solid var(--rule);border-top:1px solid var(--rule)}
+  .it{border-bottom:1px solid var(--rule);padding:9px 12px;cursor:pointer}
+  .it:hover{background:var(--panel2)}
+  .it.on{background:var(--panel2);box-shadow:inset 3px 0 0 var(--axis)}
+  .it h3{margin:0 0 3px;font-size:12px;font-weight:600;line-height:1.35;display:flex;gap:7px}
+  .it h3 u{text-decoration:none;font-family:var(--mono);font-size:10px;color:var(--ink3);flex:0 0 auto;padding-top:1px}
+  .it .sv{display:inline-block;font-family:var(--mono);font-size:8.5px;letter-spacing:.06em;padding:1px 5px;margin-bottom:5px;border:1px solid currentColor}
+  .sv.a{color:var(--axis)} .sv.b{color:var(--timber)} .sv.c{color:var(--ink3)}
+  .it p{margin:0;font-size:11px;line-height:1.6;color:var(--ink2);display:none}
+  .it.on p{display:block}
+  .it p b{color:var(--ink);font-weight:600}
+  .it p code{font-family:var(--mono);font-size:10.5px;color:var(--dim)}
+  .it p .z{color:var(--axis);font-family:var(--mono);font-size:10.5px}
+  footer{flex:0 0 auto;border-top:1px solid var(--rule);padding:7px 12px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;background:var(--panel)}
+  footer .ttl{font-family:var(--disp);font-size:10px;letter-spacing:.12em;color:var(--ink3);text-transform:uppercase}
+  .chip{font-family:var(--mono);font-size:10px;color:var(--ink2);border:1px solid var(--rule);padding:3px 8px;cursor:pointer;user-select:none}
+  .chip.on{color:var(--ink);border-color:var(--ink2);background:var(--panel2)}
+  .cut{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;color:var(--ink2)}
+  .cut input[type=range]{width:92px;accent-color:var(--axis)}
+  .cut output{color:var(--axis);min-width:42px;display:inline-block}
+  ::-webkit-scrollbar{width:9px}::-webkit-scrollbar-track{background:var(--panel)}::-webkit-scrollbar-thumb{background:var(--rule)}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+  @media (max-width:1120px){#rail{flex-basis:176px}#side{flex-basis:258px}}
+</style>
+<link rel="stylesheet" href="../assets/docviewer.css">
+</head>
+<body>
+<header>
+  <h1>로후르-1 양수장 &mdash; 도면 정합성 3D 검토</h1>
+  <span class="sub">루다키 지구 / 실시설계 РП / 두샨베-2026 &middot; 5개 앨범 57장 &middot; 원본 150 dpi 래스터</span>
+  <span class="warn" id="cnt">부적합 &mdash;</span>
+</header>
+<main>
+  <aside id="rail"><div class="cap">표고 스택</div><div id="stack"></div></aside>
+  <section id="view">
+    <canvas id="cv"></canvas>
+    <div id="labels"></div>
+    <div id="modes">
+      <button data-m="site" class="on">부지 전체</button>
+      <button data-m="ps">양수장·전실</button>
+      <button data-m="sub">변전소</button>
+      <button data-m="cf">불일치 중첩</button>
+    </div>
+    <div id="legend">
+      <div><i style="background:#8b96a3"></i>철근콘크리트</div>
+      <div><i style="background:#c9b79c"></i>조적 · 마감</div>
+      <div><i style="background:#dda52e"></i>목조 · 철골 지붕틀</div>
+      <div><i style="background:#3d7fe0"></i>흡입관 Ø1000 (4계열)</div>
+      <div><i style="background:#c04aa6"></i>가압송수관 D1000</div>
+      <div><i style="background:#22a862"></i>전실 수면 · 방류</div>
+      <div><i style="background:#e0342b"></i>불일치 · 타 도면 외곽</div>
+    </div>
+    <div id="hint">드래그 회전 &middot; 휠 확대 &middot; Shift+드래그 이동</div>
+  </section>
+  <aside id="side"><div class="cap"><span>부적합 · 질의 항목</span><u id="cnt2">&mdash;</u></div><div id="list"></div></aside>
+</main>
+<footer>
+  <span class="ttl">레이어</span>
+  <span class="chip on" data-l="roof">지붕</span>
+  <span class="chip on" data-l="wall">벽체·창호</span>
+  <span class="chip on" data-l="sub">지하·기초</span>
+  <span class="chip on" data-l="mech">펌프·배관</span>
+  <span class="chip on" data-l="fore">전실</span>
+  <span class="chip on" data-l="trafo">변전소</span>
+  <span class="chip on" data-l="small">당직실·화장실</span>
+  <span class="chip on" data-l="site">부지·관로</span>
+  <span class="chip" data-l="ghost">타 도면 외곽</span>
+  <span class="ttl" style="margin-left:4px">절단</span>
+  <label class="cut">종 <input type="range" id="cutZ" min="-14" max="20" step="0.2" value="20"><output id="oz">off</output></label>
+  <label class="cut">횡 <input type="range" id="cutX" min="-24" max="38" step="0.2" value="38"><output id="ox">off</output></label>
+</footer>
+<script>
+/* ═══ A. 데이터 + 패널 (three.js 없이도 단독 동작) ═══ */
+var STATE={mode:'site',layers:{roof:1,wall:1,sub:1,mech:1,fore:1,trafo:1,small:1,site:1,ghost:0},cutZ:20,cutX:38};
+var VIEW=null;
+
+var EV=[
+  {g:'변전소'},
+  {v:'+8.20',  n:'능선',                  s:'AC-3 입면 · AC-5 목구조', cf:1},
+  {v:'+7.500', n:'능선',                  s:'AC-6 단면 2-2', cf:1},
+  {v:'+6.00',  n:'처마 · 지붕평면 기준',   s:'AC-3 · AC-4'},
+  {v:'+2.40',  n:'개구부 상단',            s:'AC-3'},
+  {v:'+1.20',  n:'창 하단',               s:'AC-3'},
+  {v:'+0.60',  n:'기초 입상부',            s:'AC-3'},
+  {g:'양수장 본체'},
+  {v:'+6.800', n:'지붕 평면도 기준',       s:'AC-5', cf:1},
+  {v:'+3.65',  n:'지붕 능선',             s:'AC-4 · TX-4 단면'},
+  {v:'+1.250', n:'지붕 목구조 기준 (734.40)', s:'AC-6', cf:1},
+  {v:'±0.000', n:'슬래브·처마 (733.15)',   s:'AC-4 · AC-6 단면', cf:1},
+  {v:'-0.01',  n:'전실 벽 상단 (733.14)',  s:'AC-4 · 전실 TX-3'},
+  {v:'-1.11',  n:'전실 최고수위 (732.04)', s:'AC-4 · 전실 TX-3'},
+  {v:'-1.15',  n:'펌프 축 중심 (조합 산정)', s:'TX-6 h=600 + TX-9', cf:1},
+  {v:'-2.10',  n:'펌프실 바닥 (731.05)',   s:'AC-3·4·5 · TX-3·4'},
+  {v:'-2.80',  n:'기초 (730.35)',         s:'AC-3·4·5 · TX-3·4'},
+  {v:'-3.86',  n:'전실 바닥 (729.29)',     s:'AC-4 · 전실 TX-3'},
+  {g:'양수장 도면에 <i>잔존</i>하는 타 기준 표고'},
+  {v:'-1.25',  n:'= 580.97  → ±0.00 582.22', s:'AC-3 · TX-3 · TX-10', cf:1},
+  {v:'-1.50',  n:'= 580.72  → ±0.00 582.22', s:'AC-3 · TX-3 · TX-10', cf:1},
+  {v:'-2.60',  n:'= 579.62  → ±0.00 582.22', s:'AC-3 · TX-3 · TX-10', cf:1},
+  {g:'당직실 · 화장실'},
+  {v:'+3.50',  n:'당직실 능선',            s:'당직 AC-3·4'},
+  {v:'+3.00',  n:'화장실 최고',            s:'화장 AC-2·3'},
+  {v:'+2.60',  n:'당직실 처마',            s:'당직 AC-3·4'},
+  {v:'+2.50',  n:'화장실 처마 (높은쪽)',    s:'화장 AC-2·3'},
+  {v:'+1.80',  n:'화장실 처마 (낮은쪽)',    s:'화장 AC-2·3'},
+  {v:'-0.45',  n:'당직실 기초 입상부',      s:'당직 AC-3·4·10'},
+  {v:'-2.45',  n:'화장실 정화조 저면',      s:'화장 AC-2'},
+  {g:'±0.000의 절대표고'},
+  {v:'1457.05',n:'당직실 기초 단면 3-3 / 4-4', s:'당직 AC-10', cf:1, abs:1},
+  {v:'733.15', n:'양수장 단면 ±0.000',      s:'AC-4 · AC-6 · 전실 TX-3', cf:1, abs:1},
+  {v:'733.04', n:'평면·지붕도 ±0.00',       s:'AC-3·5 · 변전소 AC-2·3', cf:1, abs:1},
+  {v:'582.22', n:'TX-10 양수장 평면도 ±0,00', s:'TX-10', cf:1, abs:1},
+  {v:'579.62', n:'배수펌프 챔버 바닥 ±0.00',  s:'TX-11 주기', cf:1, abs:1}
+];
+
+var ISSUES=[
+ {sec:'A. 도면집 구성 · 문서관리'},
+ {id:'01',sv:'a',t:'5개 앨범 표지 제목이 전부 내용과 불일치', cam:[6,2,-4,58],
+  p:'제출된 5개 앨범의 표지 제목과 실제 수록 내용이 <b>한 건도 맞지 않고 서로 교차</b>되어 있다.<br><br>'+
+    '· 건축부 → 표지 "전실(아반카메라) 수공구조물 설계" / 내용 <b>양수장 AC 6장 + 변전소 AC 8장</b><br>'+
+    '· 기술부 → 표지 "전실(아반카메라) 건축·토목 부분" / 내용 <b>양수장 공정 TX 12장</b><br>'+
+    '· 당직실 → 표지 "전실(아반카메라) 기계실(기계장비 설치 공간)" / 내용 <b>당직실 AC 11장</b><br>'+
+    '· 전실 → 표지 "로후르-1 양수장 기술(공정) 부문 TX" / 내용 <b>전실 수리구조 5장</b><br>'+
+    '· 화장실 → 표지 "부지 정리 및 1안 청소용" / 내용 <b>1인용 화장실 AC 5장</b><br><br>'+
+    '앨범 번호도 5건 모두 표지에 <code>앨범 1</code>로 되어 있으나, 표1의 구성은 TX=앨범-2, AC=앨범-3, 당직실=앨범-4, 화장실=앨범-5다. 사업명 표기도 "로후르-1"과 "로후로-1"이 혼재한다.'},
+ {id:'02',sv:'a',t:'당직실·화장실이 "수피-오리프 양수장" 소속으로 기재', cam:[-17,2,-13,26], layer:'small',
+  p:'5개 앨범 전부의 <b>표1(작업도면 주요구성 목록)</b>이 앨범-4와 앨범-5를 다음과 같이 기재하고 있다.<br><br>'+
+    '· 앨범-4 : <b>"수피-오리프 양수장. 당직실"</b> AC 건축·구조부문<br>'+
+    '· 앨범-5 : <b>"수피-오리프 양수장. 1인용 화장실"</b> AC 건축·구조부문<br><br>'+
+    '즉 도면집 스스로 이 두 앨범이 <b>다른 양수장 사업의 도면</b>임을 기재하고 있다. 실제 시트 표제란은 "로후르-1 양수장"으로 되어 있어 표1과도 충돌한다. '+
+    '또한 당직실 앨범은 문서번호 체계가 <code>IWRMP-CQS-01.xx</code>로, 양수장·변전소·전실 앨범의 <code>ПЗ / ТГИ / АС / ТХ / ЭО / СМ</code> 체계와 다르다.'},
+ {id:'03',sv:'a',t:'당직실 도면이 로후르-0 "기계실" 도면과 동일', cam:[-17,2,-13,26], layer:'small',
+  p:'로후르-0 검토 시 <b>항목 12</b>로 지적한 "기계실" 앨범과 본 당직실 앨범이 같은 도면이다. 다음 수치가 <b>전부 일치</b>한다.<br><br>'+
+    '평면 <code>4 500 × 3 000</code>, 벽체 벽돌조 <code>380 mm</code> · SCADA실 <code>7.74 m²</code> / 탈의실 <code>2.60 m²</code> · '+
+    '기술경제지표 <code>19.18 / 43.3 / 16.66 / 10.34 / 10.34</code> · 실내 마감 천장 <code>12.0</code> / 벽 <code>91.0 m²</code> · '+
+    '표고 <code>-0.45 / ±0.00 / +0.600 / +2.10 / +2.60 / +3.50</code> · 지붕 우진 <code>22°</code> · '+
+    '기초 단면 3-3·4-4의 <code>±0.00 (1457.05)</code> · 인방보 ПРМ-1 2300/1500, ПРМ-2 1800/1000 · 목재보 50×150 6·4·8개 · 메쉬 СГ-1 Ø5Вр 0.775 / Ø3Вр 0.05772.<br><br>'+
+    '13장 시트의 <b>배열 순서까지 대응</b>한다(이미지 해시 최근접: 3→3, 4→4, 7→7, 8→8, 9→9, 10→10, 11→11). '+
+    '한편 이 앨범 본문은 부지를 <b>"단가라 남서부 지역"</b>으로, 내진을 <b>7도</b>로 기술한다. 루다키 지구가 아니며 로후르-0 건축부의 9포인트와도 다르다.'},
+ {id:'04',sv:'a',t:'AC-3과 TX-3이 동일 도면 · AC 앨범에 건축 평면도 없음', cam:[18,1,3,44],
+  p:'건축·구조부문(AC) 앨범 4번째 시트와 공정부문(TX) 앨범 4번째 시트가 <b>동일 도면</b>이다(이미지 해시 거리 <code>4</code>/256 — 표제란만 다름). AC-2와 TX-2(부지 평면도), AC-4와 TX-4(1-2축 단면도)도 같다.<br><br>'+
+    '그 결과 AC 앨범 6장의 구성이 ① 일반사항 ② 부지 평면도 ③ <b>수력기계설비 배치도</b> ④ 단면도 ⑤ 지붕 평면도 ⑥ 지붕 목구조가 되어, '+
+    '<b>양수장 본체의 건축 평면도와 입면도가 한 장도 없다.</b> 실 구획·마감·개구부 배치를 건축 도면으로 확인할 수 없다.<br><br>'+
+    'AC 앨범 표1의 도면 목록 표제도 <b>"주요구성(ТХ) 작업도면 목록"</b>으로 잘못 기재되어 있다.'},
+ {id:'05',sv:'b',t:'제출 누락 — 전기부문(ЭО) 등 4개 구성', cam:[6,2,-4,58],
+  p:'표1이 열거한 구성 중 다음이 미제출이다.<br><br>'+
+    '· 앨범-1 <code>НРР.ЖБ</code> 가압조절저수조 W=250 ㎥ &mdash; 가압송수관 542 m의 종점 구조물<br>'+
+    '· 앨범-6 <code>ЭО</code> 전기부문 &mdash; <b>변전소·배전반실의 설비 배치 확인 불가</b><br>'+
+    '· <code>ПЗ</code> 설명서 1권, <code>ТГИ</code> 공학·지형측량 조사 2권, <code>СМ</code> 견적서류 3권<br><br>'+
+    '특히 ЭО가 없으면 변전소 4개 실(홀·변전실·배전반실·창고)에 어떤 설비가 들어가는지, 6 kV 인입과 펌프 4대 전원(1000 kW×3 + 560 kW)이 정합하는지 검증할 수 없다.'},
+
+ {sec:'B. 양수장 본체'},
+ {id:'06',sv:'a',t:'펌프 전동기가 슬래브를 450 mm 관통', cam:[14.3,-1,1.6,15], layer:'mech',
+  p:'도면 기재값을 그대로 조합하면 №1~№3이 구조물과 충돌한다.<br><br>'+
+    '· 펌프실 바닥 <code>-2.10</code> (731.05) / 슬래브·처마 <code>±0.000</code> (733.15) → <b>벽측 유효고 2.10 m</b><br>'+
+    '· 기초(TX-9) 바닥면 위 돌출 <code>+0.35~0.60</code> → 기초 상단 <code>-1.75</code><br>'+
+    '· №1~3 KQSN800-M17S-625 전고 <code>HD = 2 200</code> → 전동기 상단 <span class="z">+0.45</span><br><br>'+
+    '<b>슬래브 레벨을 450 mm 초과</b>한다. №4 KQSN700-M9J-869는 HD 1 655로 <code>-0.09</code>, 여유 95 mm에 그친다. '+
+    '기존 건물을 존치·복구하는 설계이므로 유효고를 늘릴 수 없다면 기종·기초고 재검토가 필요하다.'},
+ {id:'07',sv:'a',t:'양중 계획 부재 — 기존 레일 보수만 계상', cam:[14.3,1,3.2,18], layer:'mech',
+  p:'AC-4 물량내역서는 <code>기존 레일 보수 72.0 m</code>와 <code>기존 레일 위 회전바퀴 교체 12개</code>만 계상하고, 설비·자재 사양서(TX-12)에는 <b>양중설비가 없다</b>.<br><br>'+
+    '인양 대상은 №1~3 <code>11 698 kg/대</code>, №4 <code>9 902 kg/대</code>(합계 44 996 kg)이다. 기존 크레인의 <b>정격 하중·양정·훅 높이가 어느 도면에도 없다</b>. '+
+    '항목 06과 함께 보면 유효고 2.10 m 안에서 전고 2.20 m 기기를 인양·반출하는 것이 성립하지 않는다.<br><br>'+
+    '참고로 로후르-0에는 <code>T3 10-921 · 10톤 이하 전동 호이스트</code>가 계상되어 있었고, 그때도 세트 중량 11.7 t을 넘겨 정격 초과였다.'},
+ {id:'08',sv:'a',t:'본체 폭 5종 · 길이 3종', cam:[18,1,3,44],
+  p:'<b>폭</b> — 부지 범례 <code>7.80 m</code> / AC-3 축 А–Б <code>6 400</code> / AC-5·6 외곽 <code>7 600</code> / AC-4 단면 <code>6 000</code> / AC-6 단면 <code>8 500</code><br>'+
+    '<b>길이</b> — 부지 범례 <code>45.0 m</code> / AC-3 축 ①–② <code>36 000</code> / AC-5·6 외곽 <code>37 200</code><br><br>'+
+    '부지 범례 45.0 m는 본체 36.0 m에 전실 9.0 m를 더한 값과 같은데, 전실은 범례 4번으로 별도 계상되어 있어 <b>중복 계상</b>이 의심된다. '+
+    'AC-3 상단 치수열은 <code>6 400+7 750+7 550+7 500+6 450 = 35 650</code>으로 하단 치수열(36 000)보다 <span class="z">350 mm 부족</span>하다.'},
+ {id:'09',sv:'a',t:'로후르-0의 표고 주석이 잔존 — 두 도면의 공통 원본', cam:[18,-1,3,40],
+  p:'AC-3 / TX-3 / TX-10에 <code>-1.25 = 580.97</code>, <code>-1.50 = 580.72</code>, <code>-2.60 = 579.62</code>가 '+
+    '<code>±0.00 = 733.04</code>와 <b>함께</b> 기입되어 있다. 앞의 세 값을 역산하면 기준면은 <span class="z">582.22</span>로, 733 m대와 <b>151 m 차이</b>다.<br><br>'+
+    '이 세 값은 <b>로후르-0 TX-5의 표고와 완전히 동일</b>하다. 나아가 두 도면의 구간 치수를 비교하면 중간 3구간이 <code>7 750 / 7 550 / 7 500</code>으로 같고 양단만 조정되어 있다.<br><br>'+
+    '· 로후르-1 : 6 550 + 7 750 + 7 550 + 7 500 + 6 650 = <b>36 000</b> = 총치수 기입값 (정합)<br>'+
+    '· 로후르-0 : 6 850 + 7 750 + 7 550 + 7 500 + 6 850 = <b>36 500</b>, 총치수 기입 <b>30 000</b> (6 500 초과)<br><br>'+
+    '<b>로후르-0 검토 항목 03의 치수 불일치는 36 m 원본을 30 m로 고쳐 쓴 결과</b>로 판단된다. 로후르-0 건축 도면은 30 m×7.2 m로 자체 정합했으므로, '+
+    '로후르-0에서는 건축과 기계가 서로 다른 건물을 그린 셈이 된다.'},
+ {id:'10',sv:'b',t:'TX-10 "양수장 평면도"는 다른 건물', cam:[-21,1,24.7,34], layer:'ghost', mode:'cf',
+  p:'TX-10 상단의 "양수장 평면도 1:100"은 <code>17 880 × 5 400</code>, 기준면 <code>±0,00 = 582.22</code>, 창 О-1 4개, 문 ВМ-2 1개다.<br><br>'+
+    '같은 앨범 TX-3의 양수장은 <code>36 000 × 6 400</code>, <code>±0.00 = 733.04</code>다. <b>길이 2배, 기준면 151 m 차이</b>로, 동일 건물일 수 없다. '+
+    '582.22 계열은 항목 09의 잔존 표고와 같은 기준면이다. 붙어 있는 "배수시스템 평면도"도 이 17 880 건물 기준으로 작도되어 있다.'},
+ {id:'11',sv:'b',t:'지붕 파형강판 483.60 m² — 기하 형상과 불일치', cam:[18,4,3,44], layer:'roof',
+  p:'AC-6 사양서는 지붕층 파형강판(두께 0.05 mm)을 <code>483.60 m²</code>로 계상한다. 그러나 외곽 <code>37.2 × 7.6</code>, 경사 <code>i = 30°</code>로 산정하면 '+
+    '사면적은 <code>37.2 × (3.8 / cos30° × 2) ≈ 326 m²</code>다. <span class="z">48% 초과</span>다.<br><br>'+
+    '같은 방식으로 변전소(AC-4 주기 "금속기와 또는 파형강판 140 m²")를 검산하면 <code>16.0 × 7.7</code>, 30° → <code>142 m²</code>로 정합한다. '+
+    '양수장 쪽만 맞지 않으므로 산출 근거 확인이 필요하다. 중도리 ПР-1은 형강 80×60×3, <code>L=37 200 mm × 16개 = 3 666.4 kg</code>으로 정합한다.'},
+
+ {sec:'C. 기계 · 관로'},
+ {id:'12',sv:'a',t:'펌프 축 중심이 전실 최고수위와 40 mm 차 · 자흡 설비 없음', cam:[14,-2,6,20], layer:'mech',
+  p:'축 중심 = 바닥 <code>-2.10</code> + 기초 돌출 <code>0.35</code> + <code>h = 600</code>(TX-6) = <span class="z">-1.15</span> (절대 732.00 m)<br>'+
+    '전실 최고수위 <code>732.04 막 ГВ</code> = <code>-1.11</code><br><br>'+
+    '<b>최고수위에서도 침수 여유가 40 mm뿐</b>이고, <b>최저 운전수위는 5개 앨범 어디에도 없다</b>. 수위가 조금만 내려가면 흡입 양정 운전이 되어 자흡이 필요하다.<br><br>'+
+    '그런데 설비·자재 사양서(TX-12)에는 배수용 원심펌프 <code>K 20/18</code> 1대만 있고 <b>진공펌프·프라이밍 탱크가 없다</b>. '+
+    '로후르-0에는 진공펌프 <code>BBH1-6</code> 2대와 프라이밍 탱크 <code>ТП 820-3-5</code>가 계상되어 있었다.'},
+ {id:'13',sv:'a',t:'NPSH 여유 부족 — 표고 733 m 대기압 저하', cam:[14,-2,6,20], layer:'mech',
+  p:'표고 733 m의 대기압은 <code>92.8 kPa = 9.48 mH₂O</code>로 해수면(10.35)보다 <code>0.87 m</code> 낮다.<br><br>'+
+    '최고수위·손실 제외 조건에서 <code>NPSHa ≈ 9.28 m</code>, №1~3의 <code>NPSHr = 7.9 m</code>(TX-6) → <b>여유 1.38 m</b>. '+
+    '여기서 흡입관 Ø1000 × 52 m, 동심리듀서, 협잡물제거스크린 4개의 손실을 빼면 여유가 <span class="z">1 m 미만</span>으로 남는다. 최저수위 조건에서는 음수가 될 수 있다.<br><br>'+
+    '№4는 <code>NPSHr = 4.2 m</code>로 상대적으로 여유가 있다. 최저 운전수위를 명시한 <b>NPSH 검토서</b>가 필요하다.'},
+ {id:'14',sv:'a',t:'펌프 플랜지 구경과 관부속 구경 불일치', cam:[14.3,-1,4.5,16], layer:'mech',
+  p:'<b>펌프 플랜지</b>(TX-6 · TX-8) — №1~3 흡입 DN1 <code>Ø800</code> / 토출 DN2 <code>Ø700</code>, №4 흡입 <code>Ø700</code> / 토출 <code>Ø600</code><br>'+
+    '<b>사양서 관부속</b>(TX-12) — 흡입 동심리듀서 <code>Dy 800×1000</code> 4개, 가압 리듀서 <code>Dy 600×1000</code> 4개, 게이트밸브 <code>Ø600</code> 4개, 신축이음 <code>Dy 600</code> 4개<br><br>'+
+    '· №1~3 토출 <b>Ø700 ↔ Ø600</b> : 700→600 축소 부재가 없다<br>'+
+    '· №4 흡입 <b>Ø700 ↔ 800</b> : 800→700 축소 부재가 없다<br><br>'+
+    '관부속이 4개씩 균일 계상되어 <b>№4가 다른 기종임이 반영되지 않았다</b>. 게이트밸브 Ø600에서 №1~3의 유속은 <code>5.09 m/s</code>로 밸브 상시 통과 유속으로는 높다.'},
+ {id:'15',sv:'a',t:'기초 1종으로 이기종 2종 대응 · 앵커 규격 상이', cam:[21.85,-2,1.6,14], layer:'sub',
+  p:'TX-9는 기초 <code>4 565 × 2 000</code> 1종을 <b>4개소 전부</b>에 적용한다. 앵커 배치는 <code>400+1 882.5+1 882.5+400</code> / 폭 <code>200+1 600+200</code>, 볼트 <code>M30×600 6개</code>다.<br><br>'+
+    '· №1~3 프레임 <code>L0 = 4 800</code> → 기초보다 <span class="z">235 mm 길다</span>, A0 2 000 / B0 2 400, 볼트 <code>M36×600</code><br>'+
+    '· №4 프레임 <code>L0 = 5 000</code> → 기초보다 <span class="z">435 mm 길다</span>, A0 1 800 / B0 2 500, 볼트 <code>36×600</code><br><br>'+
+    '프레임이 기초보다 길고, 앵커 스팬(1 600 × 3 765)이 A0·B0와 맞지 않으며, <b>볼트가 M30 vs M36으로 다르다</b>. '+
+    '기존 기초 철거는 <code>2.30×4.9×1.0 = 11.27 ㎥ × 4 = 45.0 ㎥</code>로 정합하나, 신설 기초는 №4용 별도 도면이 없다.'},
+ {id:'16',sv:'b',t:'펌프 임펠러 직경이 도면·사양서에서 다름', cam:[14.3,-1,1.6,18], layer:'mech',
+  p:'<b>№1~3</b> — 설치도(TX-6) 표 <code>625 mm</code> / 도면 표제 <code>KQSN800-M17S-625</code> / 설비 사양서(TX-12) <code>Dk = 615.8 mm</code>. 유량도 <code>5 769</code> vs <code>5 184 m³/h</code>, 양정 <code>49</code> vs <code>50 m</code>로 다르다.<br><br>'+
+    '<b>№4</b> — 설치도(TX-8) 표 <code>799 mm</code> / 도면 표제 <code>KQSN700-M9J-869</code> / 사양서 <code>Dk = 862.8 mm</code>. <b>3종</b>이다.<br><br>'+
+    '사양서의 <code>615.8 / 5 184 / 50</code>은 로후르-0 사양서와 동일한 값이어서, 사양서가 갱신되지 않은 것으로 보인다. '+
+    '한편 세트 중량은 №1~3 <code>3 848+7 850 = 11 698</code>, №4 <code>5 402+4 500 = 9 902 kg</code>으로 정합한다.'},
+ {id:'17',sv:'b',t:'철거 물량 중량이 로후르-0과 소수점까지 동일', cam:[18,-1,3,40],
+  p:'TX-4 철거공사 물량내역서의 중량 <code>26 298.0 / 19 500.0 / 4 960.0 / 3 350.0 kg</code> 네 값이 '+
+    '<b>로후르-0 철거 물량표의 네 값과 완전히 같다</b>.<br><br>'+
+    '다만 계상 단위가 다르다. 로후르-0은 "펌프-전동기 세트(2대)"였고 로후르-1은 "펌프 3개" / "전동기 3개"로 분리되어 있다. '+
+    '즉 <b>같은 숫자가 서로 다른 의미로 쓰였다</b>. 기존 기종도 로후르-1은 <code>Д6300-80(24НДс)</code>·<code>Д4000-95(22НДс)</code>, '+
+    '로후르-0은 <code>D2600-80</code>·<code>D4000-85</code>·<code>D4500-90</code>으로 다르다. 현황 실측에 근거한 철거 물량 재산정이 필요하다.'},
+ {id:'18',sv:'b',t:'가압송수관 2계열 합류 · 저수조 도면 미제출', cam:[18,0,-9,40], layer:'site',
+  p:'부지 범례는 가압송수관을 <code>D=1000 mm 4계열, 34.0 m</code>(건물~연결점)에서 <code>D=1000 mm 2계열, 542.0 m</code>(연결점~가압저수조)로 계상한다.<br><br>'+
+    '총유량 <code>5 184×3 + 3 600 = 19 152 m³/h = 5.32 m³/s</code>로 산정하면 유속이 4계열 <code>1.67 m/s</code> → 2계열 <span class="z">3.35 m/s</span>가 된다. '+
+    '2계열 구간의 마찰손실·수격압 검토와 <b>연결점(합류부) 상세</b>가 필요하다.<br><br>'+
+    '종점인 가압조절저수조(<code>W = 250 ㎥</code>, 표1 앨범-1 НРР.ЖБ)는 미제출이다. 저수조 수위를 모르면 실양정과 펌프 운전점을 확정할 수 없다.'},
+
+ {sec:'D. 변전소 · 부속 건물 · 전실'},
+ {id:'19',sv:'a',t:'변전소 치수 4종 · 축 번호 체계 3종', cam:[-3.2,2,-1,26], mode:'sub', layer:'trafo',
+  p:'<b>길이</b> — 평면 AC-2 <code>14 800</code> / 입면 AC-3 <code>15 200</code> / 지붕 AC-4·5 외곽 <code>16 000</code> / 부지 범례 <code>15.0 m</code><br>'+
+    '<b>폭</b> — 평면 AC-2 <code>6 500</code> / 입면·지붕 <code>6 900</code> / 지붕 외곽 <code>7 700</code> / 단면 AC-5 <code>3 250+3 250 = 6 500</code> / 부지 범례 <code>6.70 m</code><br>'+
+    '<b>축 번호</b> — 평면 <code>① ②</code> / 입면 <code>1 – 3</code> / 지붕·단면 <code>① ~ ⑤</code><br><br>'+
+    'AC-6 단면 2-2는 <code>2 400 × 5 = 12 000</code>을 표기하면서 전체를 <code>14 800</code>으로 적어 <span class="z">2 800 mm</span>가 설명되지 않는다. '+
+    '능선 표고도 <code>+8.20</code>(AC-3·AC-5)과 <code>+7.500</code>(AC-6)으로 <b>700 mm</b> 다르다.<br><br>'+
+    '정합 확인된 항목: 실 면적 합 <code>8.15+5.93+20.3+37.7 = 72.1 m²</code>가 천장 청소 <code>72.11 m²</code>와 일치한다.'},
+ {id:'20',sv:'a',t:'변전소 마우얼라트 L=36.40 m — 양수장 부재', cam:[-3.2,6,-1,24], mode:'sub', layer:'trafo',
+  p:'변전소 지붕 목구조 사양서(AC-5)의 마우얼라트(도리)는 <code>단면 80×100, L = 36.40 m, 1개</code>다. '+
+    '그런데 이 건물의 길이는 <code>15.2 m</code>다.<br><br>'+
+    '<code>36.40 m</code>는 <b>양수장 본체</b>(축간 36 000, 외곽 37 200)의 치수대다. 양수장 중도리 ПР-1도 <code>L = 37 200</code>이다. '+
+    '<b>양수장 지붕 부재표가 변전소 사양서에 유입</b>된 것으로 보인다. 부재 물량 전반의 재산정이 필요하다.'},
+ {id:'21',sv:'b',t:'양수장 부속부와 변전소가 같은 자리에 중복', cam:[-3.2,2,3,26], mode:'cf', layer:'trafo',
+  p:'AC-3 평면도의 축① 서쪽 부속부는 <code>3 200 + 1 350 + 1 950 = 6 500</code> 폭에 <code>ТП</code>(변전소) · <code>Хол</code>(홀) · <code>Р/У</code>(배전반) · 계단을 배치한다.<br><br>'+
+    '별동 변전소(AC-2)도 <code>3 200 + 1 350 + 1 950 = 6 500</code> 폭에 홀 · 변전실 · 배전반실 · 창고를 배치한다. '+
+    '<b>폭 치수와 실 구성이 동일</b>하고, 변전소 평면도 우측에는 <code>Здание НС</code>(양수장 건물)가 인접 표기되어 있다.<br><br>'+
+    'AC-3의 부속부가 별동 변전소를 잘라 표시한 것이라면 부지 범례의 <code>6.70 × 15.0</code>과 맞춰야 하고, 별개 시설이라면 <b>ТП·Р/У가 두 곳에 중복 배치</b>된 것이다. '+
+    '전기부문(ЭО) 미제출로 판정할 수 없다.<br><br>'+
+    '참고로 로후르-0에서 <b>누락</b>으로 지적한 부속동(전기실·계량실, 6 400 × 6 600)이 로후르-1에는 8장 도면으로 존재한다. 로후르-0의 누락은 설계 범위가 아니라 <b>편집 누락</b>일 가능성이 크다.'},
+ {id:'22',sv:'b',t:'부지 범례와 물량내역서의 건물 규격 불일치', cam:[-17,2,-13,26], layer:'small',
+  p:'같은 도면(AC-2 / TX-2) 안에서 범례와 물량내역서가 다르고, 실제 도면과 또 다르다.<br><br>'+
+    '<b>당직실</b> — 범례 <code>3.5 × 4.0</code> / 물량 <code>3.0 × 4.5</code> / 실도면 <code>4 500 × 3 000</code><br>'+
+    '<b>화장실</b> — 범례 <code>1.30 × 2.35 × 3.0</code> / 물량 <code>1.3 × 1.8</code> / 실도면 외곽 <code>3 600 × 2 500</code>, 내부 <code>1 800 × 1 300</code><br><br>'+
+    '물량내역서 값이 실도면과 가깝고 범례가 어긋난다. 기술경제지표도 맞지 않는다. 당직실 <code>4.5 × 3.0 = 13.5 m²</code> vs 건축면적 <code>19.18 m²</code>, '+
+    '화장실 <code>3.6 × 2.5 = 9.0 m²</code> vs 건축면적 <code>5.76 m²</code>.<br><br>'+
+    '화장실 조명 도면(AC-5)은 주기에서 차단기를 <code>А1031-10А</code>로 지정하면서 사양서에는 <code>А1031-6А</code>를 기재했다. 또 이 조명 도면은 표제란이 <code>AC</code>인데 내용은 전기부문이다.'},
+ {id:'23',sv:'b',t:'방류수문 규격 170×150 vs 100×100', cam:[15,-1,13.5,30], layer:'fore',
+  p:'부지 범례 6번은 방류수문(GS)을 <code>170 × 150 cm</code> 기존시설 복구대상으로 계상한다. '+
+    '전실 앨범 TX-3 물량내역서는 <code>신설 수문판(GS) 100 × 100 cm 4개 설치</code>로 되어 있다.<br><br>'+
+    '<b>규격과 수량, 신설·복구 구분이 모두 다르다.</b> 방류관은 Ø1000 55.0 m로, 수문 통수 단면과의 정합 확인이 필요하다.<br><br>'+
+    '전실 앨범 TX-2의 범례는 항목 번호가 <code>1,2,3,4,6,7</code>로 <b>5번이 결번</b>이고, 도면 제목은 "축척 1:250"인데 표제란은 "1:500"이다.<br><br>'+
+    '정합 확인된 항목: 난간 ОГ-1 폭 1 626 mm, 설치 <code>108.0 m ÷ 1.626 = 66.4 → 67개</code>가 사양서 "총 67개 제작"과 일치한다. 협잡물제거스크린도 1.25×1.5 m 4개로 정합한다.'},
+ {id:'24',sv:'c',t:'4개소 간 표고 관계 — 로후르-2·3 수령 후 확정', cam:[6,4,-4,66],
+  p:'로후르-0의 <code>±0.00 = 730.34</code>(TX)와 로후르-1의 <code>±0.00 = 733.04 / 733.15</code>는 <b>약 2.8 m 차이</b>다. '+
+    '그런데 각 양수장의 펌프 양정은 <code>H = 50 m</code>급이다.<br><br>'+
+    '로후르-1 앨범에 "1단계 양수장 부지", "로후르-1 양수장(2단계) 전실"이라는 단계 표기가 있고, 로후르-0 종단면도는 상부 저수지로의 양수를 보인다. '+
+    '4개소가 직렬 다단 양수라면 <b>단간 표고차가 양정에 상응</b>해야 하는데 현재 자료로는 성립하지 않는다.<br><br>'+
+    '병렬 배치인지, 각 단이 별도 관개구역을 담당하는지에 따라 해석이 달라진다. <b>로후르-2·3 자료를 받은 뒤 4개소 종단 관계를 하나의 축으로 정리</b>해 확정할 항목이다.'}
+];
+
+/* ── 표고 스택 ── */
+(function(){
+  var st=document.getElementById('stack');
+  EV.forEach(function(e){
+    if(e.g){ var h=document.createElement('div'); h.className='grp'; h.innerHTML=e.g; st.appendChild(h); return; }
+    var d=document.createElement('div'); d.className='ev'+(e.cf?' cf':'');
+    d.innerHTML='<b>'+e.v+'</b><i class="tk"></i><span>'+e.n+(e.cf?' ⚠':'')+'<em>'+e.s+'</em></span>';
+    d.onclick=function(){
+      var was=d.classList.contains('on');
+      [].forEach.call(document.querySelectorAll('.ev'),function(x){x.classList.remove('on')});
+      if(was){ if(VIEW) VIEW.plane(null); return; }
+      d.classList.add('on');
+      if(VIEW) VIEW.plane(e.abs?null:{y:parseFloat(e.v.replace('±','').replace('+','')),t:e.v});
+    };
+    st.appendChild(d);
+  });
+})();
+
+/* ── 부적합 목록 ── */
+(function(){
+  var L=document.getElementById('list'), n=0;
+  ISSUES.forEach(function(it){
+    if(it.sec){ var s=document.createElement('div'); s.className='sec'; s.textContent=it.sec; L.appendChild(s); return; }
+    n++;
+    var d=document.createElement('div'); d.className='it';
+    d.innerHTML='<h3><u>'+it.id+'</u>'+it.t+'</h3><span class="sv '+it.sv+'">'+
+      (it.sv==='a'?'중대':it.sv==='b'?'확인 필요':'후속 확정')+'</span><p>'+it.p+'</p>';
+    d.onclick=function(){
+      var was=d.classList.contains('on');
+      [].forEach.call(document.querySelectorAll('.it'),function(x){x.classList.remove('on')});
+      if(was) return;
+      d.classList.add('on');
+      if(it.layer && !STATE.layers[it.layer]){
+        STATE.layers[it.layer]=1;
+        var c=document.querySelector('.chip[data-l="'+it.layer+'"]'); if(c) c.classList.add('on');
+      }
+      if(it.mode) setMode(it.mode); else if(VIEW) VIEW.sync();
+      if(VIEW) VIEW.fly(it.cam);
+      d.scrollIntoView({block:'nearest',behavior:'smooth'});
+    };
+    L.appendChild(d);
+  });
+  document.getElementById('cnt').textContent='부적합 '+n+'건';
+  document.getElementById('cnt2').textContent=n;
+})();
+
+/* ── 모드 · 레이어 · 절단 ── */
+function setMode(m){
+  STATE.mode=m;
+  [].forEach.call(document.querySelectorAll('#modes button'),function(b){b.classList.toggle('on',b.dataset.m===m)});
+  if(VIEW) VIEW.sync();
+}
+[].forEach.call(document.querySelectorAll('#modes button'),function(b){b.onclick=function(){setMode(b.dataset.m)}});
+[].forEach.call(document.querySelectorAll('.chip'),function(c){
+  c.onclick=function(){
+    var k=c.dataset.l; STATE.layers[k]=STATE.layers[k]?0:1;
+    c.classList.toggle('on',!!STATE.layers[k]); if(VIEW) VIEW.sync();
+  };
+});
+(function(){
+  var cz=document.getElementById('cutZ'), cx=document.getElementById('cutX');
+  function upd(){
+    STATE.cutZ=parseFloat(cz.value); STATE.cutX=parseFloat(cx.value);
+    document.getElementById('oz').textContent = STATE.cutZ<19.8 ? STATE.cutZ.toFixed(1)+' m':'off';
+    document.getElementById('ox').textContent = STATE.cutX<37.8 ? STATE.cutX.toFixed(1)+' m':'off';
+    if(VIEW) VIEW.cut();
+  }
+  cz.oninput=cx.oninput=upd; upd();
+})();
+</script>
+<script src="../assets/three.min.js"></script>
+<script>
+/* ═══ C. 3D 장면 ═══
+   좌표 : X = 양수장 종방향(축①→②) / Z = 횡방향(축А→Б) / Y = 표고, 0 = ±0.000 = 733.15
+   모든 형상은 도면에 기재된 치수·표고 숫자로 세운 것이며 트레이싱이 아님.
+   원본 PDF는 150 dpi 래스터(벡터 0) — 부지 내 상대 배치는 개략.
+*/
+(function(){
+try{
+  if(typeof THREE==='undefined') throw new Error('three.js가 로드되지 않았습니다.');
+  var cv=document.getElementById('cv');
+  var renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  renderer.setClearColor(0x0d1218);
+  var scene=new THREE.Scene(); scene.fog=new THREE.Fog(0x0d1218,80,230);
+  var camera=new THREE.PerspectiveCamera(42,1,0.4,700);
+  scene.add(new THREE.HemisphereLight(0xcfe0f0,0x1a2129,0.9));
+  var d1=new THREE.DirectionalLight(0xffffff,0.78); d1.position.set(-30,40,26); scene.add(d1);
+  var d2=new THREE.DirectionalLight(0x93b4d8,0.30); d2.position.set(34,14,-28); scene.add(d2);
+  var planeZ=new THREE.Plane(new THREE.Vector3(0,0,-1),20);
+  var planeX=new THREE.Plane(new THREE.Vector3(-1,0,0),38);
+
+  function M(c,o){var p={color:c,roughness:0.85,metalness:0};for(var k in(o||{}))p[k]=o[k];
+                  return new THREE.MeshStandardMaterial(p);}
+  var MAT={
+    conc:M(0x8b96a3), conc2:M(0x76818d), brick:M(0xc9b79c,{roughness:0.95}),
+    roof:M(0xa5b0bb,{roughness:0.42,metalness:0.45}), tile:M(0xb4564a,{roughness:0.6}),
+    timber:M(0xdda52e,{roughness:0.75}),
+    glass:M(0x63a8dc,{transparent:true,opacity:0.34,roughness:0.08,metalness:0.1}),
+    door:M(0x5c6a78,{metalness:0.5,roughness:0.45}), steel:M(0xb4bec9,{metalness:0.72,roughness:0.32}),
+    motor:M(0x69798a,{metalness:0.35,roughness:0.55}),
+    suct:M(0x3d7fe0,{roughness:0.45,metalness:0.25}), press:M(0xc04aa6,{roughness:0.45,metalness:0.25}),
+    water:M(0x22a862,{transparent:true,opacity:0.42,roughness:0.15}),
+    asph:M(0x232a33,{roughness:1}), soil:M(0x2c333c,{roughness:1}),
+    hot:M(0xe0342b,{roughness:0.5,emissive:0x3a0805}),
+    ghost:new THREE.MeshBasicMaterial({color:0xe0342b,transparent:true,opacity:0.09,side:THREE.DoubleSide}),
+    hi:new THREE.MeshBasicMaterial({color:0xe0342b,transparent:true,opacity:0.18,side:THREE.DoubleSide})
+  };
+  var FADE=[MAT.brick,MAT.roof,MAT.conc,MAT.conc2,MAT.tile,MAT.timber];
+
+  function box(g,mat,x0,x1,y0,y1,z0,z1){
+    var m=new THREE.Mesh(new THREE.BoxGeometry(Math.abs(x1-x0)||0.01,Math.abs(y1-y0)||0.01,Math.abs(z1-z0)||0.01),mat);
+    m.position.set((x0+x1)/2,(y0+y1)/2,(z0+z1)/2); g.add(m); return m;
+  }
+  function cyl(g,mat,r,h,x,y,z,rx,ry,rz){
+    var m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,20),mat);
+    m.position.set(x,y,z); m.rotation.set(rx||0,ry||0,rz||0); g.add(m); return m;
+  }
+  function tri(g,mat,list){
+    var pos=[]; list.forEach(function(t){t.forEach(function(v){pos.push(v[0],v[1],v[2])})});
+    var geo=new THREE.BufferGeometry();
+    geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3)); geo.computeVertexNormals();
+    var m=new THREE.Mesh(geo,mat); g.add(m); return m;
+  }
+  function quad(a,b,c,d){return [[a,b,c],[a,c,d]];}
+  /* 박공 지붕 : 처마 ye, 능선 ya, 능선은 z 중앙, x 방향 길이 */
+  function gable(g,mat,x0,x1,z0,z1,ye,ya,th){
+    var zc=(z0+z1)/2; th=th||0.15;
+    tri(g,mat, quad([x0,ye,z0],[x1,ye,z0],[x1,ya,zc],[x0,ya,zc])
+      .concat(quad([x0,ye,z1],[x0,ya,zc],[x1,ya,zc],[x1,ye,z1]))
+      .concat(quad([x0,ye-th,z0],[x0,ya-th,zc],[x1,ya-th,zc],[x1,ye-th,z0]))
+      .concat(quad([x0,ye-th,z1],[x1,ye-th,z1],[x1,ya-th,zc],[x0,ya-th,zc])));
+  }
+  /* 우진(hip) 지붕 : 용마루가 x 방향, 양단 hip 길이 hl */
+  function hip(g,mat,x0,x1,z0,z1,ye,ya,hl){
+    var zc=(z0+z1)/2, r1=x0+hl, r2=x1-hl;
+    tri(g,mat, quad([x0,ye,z0],[x1,ye,z0],[r2,ya,zc],[r1,ya,zc])
+      .concat(quad([x1,ye,z1],[x0,ye,z1],[r1,ya,zc],[r2,ya,zc]))
+      .concat([[[x0,ye,z0],[r1,ya,zc],[x0,ye,z1]],[[x1,ye,z0],[x1,ye,z1],[r2,ya,zc]]]));
+  }
+  function edg(g,x0,x1,y0,y1,z0,z1,col){
+    var e=new THREE.LineSegments(
+      new THREE.EdgesGeometry(new THREE.BoxGeometry(Math.abs(x1-x0),Math.abs(y1-y0),Math.abs(z1-z0))),
+      new THREE.LineBasicMaterial({color:col}));
+    e.position.set((x0+x1)/2,(y0+y1)/2,(z0+z1)/2); g.add(e); return e;
+  }
+  var labels=[], labHost=document.getElementById('labels');
+  function lab(t,x,y,z,cls){
+    var el=document.createElement('div'); el.className='lbl '+(cls||''); el.textContent=t;
+    labHost.appendChild(el); var o={el:el,v:new THREE.Vector3(x,y,z),grp:cls||''}; labels.push(o); return o;
+  }
+
+  var L={roof:new THREE.Group(),wall:new THREE.Group(),sub:new THREE.Group(),mech:new THREE.Group(),
+         fore:new THREE.Group(),trafo:new THREE.Group(),small:new THREE.Group(),site:new THREE.Group(),
+         ghost:new THREE.Group(),axis:new THREE.Group()};
+  for(var k in L) scene.add(L[k]);
+
+  /* ══ 기준 치수 (도면 기재값) ══ */
+  var AX1=0, AX2=36.0, ZA=0, ZB=6.4;          /* 축간 36 000 × 6 400 */
+  var WX0=-0.3, WX1=36.3, WZ0=-0.3, WZ1=6.7;  /* 벽 외곽 36 600 × 7 000 */
+  var RX0=-0.6, RX1=36.6, RZ0=-0.6, RZ1=7.0;  /* 지붕 외곽 37 200 × 7 600 */
+  var FL=-2.10, SLAB=0.0, RIDGE=3.65, FOOT=-2.80;
+  var PX=[6.55,14.30,21.85,29.35], PZ=1.6;
+  var FTOP=-1.75, FBOT=-3.10;                  /* 기초 상단/하단 */
+
+  /* 지반 · 부지 */
+  var gr=new THREE.Mesh(new THREE.PlaneGeometry(220,180),MAT.soil);
+  gr.rotation.x=-Math.PI/2; gr.position.set(4,-0.32,-1); L.site.add(gr);
+  box(L.site,MAT.asph,-26,40,-0.30,-0.28,-11,-8);                    /* 진입도로 */
+  box(L.site,MAT.asph,-26,-22,-0.30,-0.28,-14,8);
+  (function(){                                                        /* 울타리 251 m (개략) */
+    var P=[[-27,-16],[41,-16],[41,20],[26,29],[-27,29]];
+    for(var i=0;i<P.length;i++){
+      var a=P[i],b=P[(i+1)%P.length];
+      var dx=b[0]-a[0],dz=b[1]-a[1],len=Math.sqrt(dx*dx+dz*dz);
+      var m=new THREE.Mesh(new THREE.BoxGeometry(len,2.0,0.06),MAT.steel);
+      m.position.set((a[0]+b[0])/2,0.7,(a[1]+b[1])/2);
+      m.rotation.y=-Math.atan2(dz,dx); m.material=MAT.steel; L.site.add(m);
+    }
+    box(L.site,MAT.door,-26.2,-22.2,-0.3,1.7,-16.05,-15.95);          /* 철제 대문 4.0×2.0 */
+    lab('부지 울타리 251 m · 철제 대문 4.0×2.0',-24,2.4,-16,'');
+  })();
+
+  /* ══ 양수장 본체 ══ */
+  box(L.sub,MAT.conc2,RX0,RX1,FOOT-0.3,FOOT,RZ0,RZ1);                 /* 기초 -2.80 */
+  box(L.sub,MAT.conc,WX0,AX1+0.3,FOOT,SLAB,WZ0,WZ1);
+  box(L.sub,MAT.conc,AX2-0.3,WX1,FOOT,SLAB,WZ0,WZ1);
+  box(L.sub,MAT.conc,AX1+0.3,AX2-0.3,FOOT,SLAB,WZ0,ZA+0.3);
+  box(L.sub,MAT.conc,AX1+0.3,AX2-0.3,FOOT,SLAB,ZB-0.3,WZ1);
+  box(L.sub,MAT.conc2,0.6,35.4,FL-0.15,FL,0.4,6.0);                   /* 펌프실 바닥 -2.10 */
+  box(L.sub,MAT.conc2,1.0,35.0,FL,-1.95,4.4,6.1);                     /* Ш/У 측 단 */
+
+  /* ±0.000 슬래브 — 펌프 개구부 4개소 */
+  (function(){
+    box(L.wall,MAT.conc,AX1+0.3,AX2-0.3,-0.20,SLAB,ZA+0.3,0.5);
+    box(L.wall,MAT.conc,AX1+0.3,AX2-0.3,-0.20,SLAB,4.2,ZB-0.3);
+    var prev=AX1+0.3;
+    PX.forEach(function(cx){ box(L.wall,MAT.conc,prev,cx-2.55,-0.20,SLAB,0.5,4.2); prev=cx+2.55; });
+    box(L.wall,MAT.conc,prev,AX2-0.3,-0.20,SLAB,0.5,4.2);
+  })();
+
+  /* 외벽 (0.000 ~ 처마) + 창 О-1 · 문 Дн-1 1500×2400 */
+  (function(){
+    var H=SLAB;                                     /* 벽은 지하 옹벽이 슬래브까지, 상부는 지붕틀 */
+    box(L.wall,MAT.brick,WX0,WX1,SLAB,SLAB+0.25,WZ0,WZ1);   /* 슬래브 상부 조적 파라펫 */
+    /* 벽면 창 (개략 · 5 스팬) */
+    for(var i=0;i<5;i++){
+      var a=1.2+i*7.0, b=a+3.2;
+      box(L.wall,MAT.glass,a,b,FL+0.9,FL+1.7,WZ0+0.06,WZ0+0.10);
+      box(L.wall,MAT.glass,a,b,FL+0.9,FL+1.7,WZ1-0.10,WZ1-0.06);
+    }
+    box(L.wall,MAT.door,AX2-0.05,AX2+0.05,FL,FL+2.4,3.0,4.5);          /* Дн-1 1500×2400 */
+    lab('Дн-1  1 500×2 400',AX2+1.6,FL+1.3,3.7,'');
+  })();
+
+  /* 지붕 : 처마 ±0.000, 능선 +3.65, i=30° */
+  gable(L.roof,MAT.roof,RX0,RX1,RZ0,RZ1,SLAB,RIDGE,0.14);
+  for(var rx=RX0;rx<=RX1;rx+=2.25){                                    /* 중도리 ПР-1 형강 (16개) */
+    box(L.roof,MAT.timber,rx-0.04,rx+0.04,SLAB,RIDGE-0.2,3.1,3.3);
+  }
+  box(L.roof,MAT.timber,RX0,RX1,RIDGE-0.30,RIDGE-0.16,3.10,3.30);
+  lab('지붕 능선 +3.65 · i=30° · 중도리 ПР-1 L=37 200×16',18,RIDGE+0.9,3.2,'');
+
+  /* 기존 크레인 레일 72 m (AC-4 물량: 레일 보수 72.0 m, 회전바퀴 12개) */
+  box(L.mech,MAT.steel,AX1,AX2,SLAB-0.42,SLAB-0.34,1.0,1.14);
+  box(L.mech,MAT.steel,AX1,AX2,SLAB-0.42,SLAB-0.34,5.26,5.40);
+  lab('기존 크레인 레일 72 m — 정격·훅 높이 미기재',18,SLAB-0.95,5.4,'hot');
+
+  /* 펌프 4대 · 기초 4565×2000 1종 */
+  PX.forEach(function(cx,i){
+    var n4 = (i===3);
+    var fl = n4?5.0:4.8, fw = n4?2.5:2.4, hd = n4?1.655:2.200, hh = n4?0.580:0.600;
+    box(L.sub,MAT.conc2,cx-2.2825,cx+2.2825,FBOT,FTOP,PZ-1.0,PZ+1.0);   /* 기초 4565×2000 */
+    box(L.mech,MAT.steel,cx-fl/2,cx+fl/2,FTOP,FTOP+0.14,PZ-fw/2,PZ+fw/2);
+    var top=FTOP+hd;
+    cyl(L.mech, top>SLAB?MAT.hot:MAT.steel, n4?0.55:0.62, n4?1.1:1.05, cx-fl/2+1.1, FTOP+hh, PZ, 0,0,Math.PI/2);
+    box(L.mech, top>SLAB?MAT.hot:MAT.motor, cx+0.35,cx+fl/2-0.15, FTOP+0.14, top, PZ-fw/2+0.35, PZ+fw/2-0.35);
+    cyl(L.mech,MAT.steel,0.11,0.9,cx-0.4,FTOP+hh,PZ,0,0,Math.PI/2);
+    edg(L.mech,cx-fl/2,cx+fl/2,FTOP,top,PZ-fw/2,PZ+fw/2, top>SLAB?0xe0342b:0x4a5563);
+    lab('№'+(i+1)+(n4?'  KQSN700-M9J':'  KQSN800-M17S'),cx,FTOP-0.5,PZ,'');
+    if(top>SLAB) lab('전동기 상단 +0.45 — 슬래브 450 mm 관통',cx,top+0.55,PZ,'hot');
+  });
+  lab('펌프실 바닥 -2.10 (731.05) · 슬래브 ±0.000 (733.15) → 유효고 2.10 m',18,FL-0.8,PZ,'hot');
+
+  /* 흡입관 Ø1000 4계열 → 전실 */
+  PX.forEach(function(cx){
+    cyl(L.mech,MAT.suct,0.50,4.1,cx-2.4,FTOP+0.6,4.6,Math.PI/2,0,0);
+    cyl(L.mech,MAT.suct,0.50,3.6,cx-2.4,FTOP+0.6,8.4,Math.PI/2,0,0);
+  });
+  lab('흡입관 Ø1000 · 4계열 · 52 m',18,FTOP+1.3,8.6,'');
+
+  /* 가압송수관 : 4계열 34 m → 연결점 → 2계열 542 m */
+  PX.forEach(function(cx){
+    cyl(L.mech,MAT.press,0.50,2.6,cx+2.2,FTOP+0.9,-1.6,Math.PI/2,0,0);
+    cyl(L.mech,MAT.press,0.50,6.4,cx+2.2,FTOP+0.9,-6.0,Math.PI/2,0,0);
+  });
+  [11.5,26.0].forEach(function(x){
+    cyl(L.mech,MAT.press,0.50,14.0,x,FTOP+0.9,-16,Math.PI/2,0,0);
+  });
+  cyl(L.mech,MAT.press,0.50,22,18.5,FTOP+0.9,-9.2,0,0,Math.PI/2);
+  lab('가압송수관 D1000  4계열 34 m → 연결점 → 2계열 542 m  (유속 1.67 → 3.35 m/s)',18,FTOP+1.8,-17,'hot');
+
+  /* 부속부 (ТП и Р/У) — AC-3 축① 서쪽 6 500 */
+  box(L.wall,MAT.brick,-6.5,-6.2,FL,SLAB+1.0,ZA,ZB);
+  box(L.wall,MAT.brick,-6.5,AX1,FL,SLAB+1.0,ZA,ZA+0.3);
+  box(L.wall,MAT.brick,-6.5,AX1,FL,SLAB+1.0,ZB-0.3,ZB);
+  box(L.roof,MAT.roof,-6.7,0.2,SLAB+1.0,SLAB+1.2,ZA-0.2,ZB+0.2);
+  lab('부속부 6 500  ТП · Хол · Р/У',-3.2,SLAB+1.9,3.2,'rm');
+
+  /* ══ 전실(아반카메라) 9.0 × 18.0 ══ */
+  (function(){
+    var x0=6,x1=24,z0=9,z1=18, top=-0.01, wl=-1.11, bot=-3.86;
+    box(L.fore,MAT.conc,x0-0.4,x1+0.4,bot-0.4,bot,z0-0.4,z1+0.4);
+    [[x0-0.4,x0,z0-0.4,z1+0.4],[x1,x1+0.4,z0-0.4,z1+0.4],
+     [x0,x1,z0-0.4,z0],[x0,x1,z1,z1+0.4]].forEach(function(q){
+      box(L.fore,MAT.conc,q[0],q[1],bot,top,q[2],q[3]);
+    });
+    box(L.fore,MAT.water,x0,x1,bot,wl,z0,z1);
+    for(var i=0;i<4;i++){                                     /* 협잡물제거스크린 1.25×1.5 ×4 */
+      var cx=PX[i]-2.4;
+      box(L.fore,MAT.steel,cx-0.625,cx+0.625,wl-1.5,wl,z0-0.05,z0+0.02);
+    }
+    for(var x=x0;x<x1;x+=1.626){                              /* 난간 ОГ-1 108 m / 67개 */
+      box(L.fore,MAT.steel,x,x+1.55,top,top+0.9,z1+0.36,z1+0.44);
+      box(L.fore,MAT.steel,x,x+1.55,top,top+0.9,z0-0.44,z0-0.36);
+    }
+    lab('전실 9.0×18.0 · 상단 -0.01 (733.14) · 최고수위 -1.11 (732.04) · 바닥 -3.86 (729.29)',15,top+1.6,z1+1.4,'');
+    lab('협잡물제거스크린 1.25×1.5 ×4 · 난간 ОГ-1 108 m / 67개',15,wl-2.2,z0-1.6,'');
+    box(L.site,MAT.conc,24.4,40,-2.6,-2.2,11.5,14.0);          /* 유입수로 폭 2.50 */
+    box(L.site,MAT.water,24.4,40,-2.6,-2.35,11.6,13.9);
+    lab('유입수로 폭 2.50 · 68 m',33,-1.6,12.8,'');
+    cyl(L.site,MAT.water,0.50,14,31,-1.9,17.5,0,0,Math.PI/2);  /* 방류관 Ø1000 55 m */
+    lab('방류관 Ø1000 · 55 m → 방류수문 GS  170×150 ↔ 100×100',31,-0.9,18.6,'hot');
+  })();
+
+  /* ══ 변전소 6 500 × 14 800 ══ */
+  (function(){
+    var x0=-6.5,x1=0,z0=-8.4,z1=6.4,t=0.4,H=4.0,EAV=6.0,RG=8.2;
+    box(L.trafo,MAT.conc,x0-0.3,x1+0.3,-0.6,0,z0-0.3,z1+0.3);
+    [[x0,x0+t,z0,z1],[x1-t,x1,z0,z1],[x0,x1,z0,z0+t],[x0,x1,z1-t,z1]].forEach(function(q){
+      box(L.trafo,MAT.brick,q[0],q[1],0,EAV,q[2],q[3]);
+    });
+    [-5.1,-2.6,2.0].forEach(function(zp){ box(L.trafo,MAT.brick,x0,x1,0,H,zp,zp+0.3); });
+    box(L.trafo,MAT.conc,x0,x1,H,H+0.2,z0,z1);
+    hip(L.trafo,MAT.tile,x0-0.6,x1+0.6,z0-0.6,z1+0.6,EAV,RG,3.85);
+    [[-2.0],[3.0]].forEach(function(p){                        /* 지붕창(도머) i=50° ×2 */
+      box(L.trafo,MAT.tile,x0+1.4,x0+2.6,EAV+0.5,EAV+1.5,p[0],p[0]+1.0);
+      box(L.trafo,MAT.glass,x0+1.5,x0+2.5,EAV+0.7,EAV+1.3,p[0]+0.98,p[0]+1.02);
+    });
+    box(L.trafo,MAT.glass,x0+0.04,x0+0.08,1.2,3.1,-3.6,-2.4);   /* О-1 1200×1900 ×2 */
+    box(L.trafo,MAT.glass,x0+0.04,x0+0.08,1.2,3.1,-0.8,0.4);
+    box(L.trafo,MAT.door,x0+1.6,x0+3.0,0,2.35,z0+0.02,z0+0.06); /* ВМ-2 1420×2350 */
+    lab('변전소  평면 6 500×14 800 / 입면 6 900×15 200 / 지붕 7 700×16 000 / 범례 6.70×15.0',-3.2,RG+1.3,-1,'hot');
+    lab('홀',-3.2,1.4,4.2,'rm'); lab('변전실',-3.2,1.4,0.6,'rm');
+    lab('배전반실',-3.2,1.4,-3.8,'rm'); lab('창고',-3.2,1.4,-6.7,'rm');
+    lab('능선 +8.20 (AC-3·5) ↔ +7.500 (AC-6)',-3.2,RG+0.4,-8.6,'hot');
+  })();
+
+  /* ══ 당직실 4 500 × 3 000 ══ */
+  (function(){
+    var x0=-22,x1=-17.5,z0=-14,z1=-11,t=0.38,EAV=2.60,RG=3.50;
+    box(L.small,MAT.brick,x0-0.25,x1+0.25,-0.45,0,z0-0.25,z1+0.25);
+    [[x0,x0+t,z0,z1],[x1-t,x1,z0,z1],[x0,x1,z0,z0+t],[x0,x1,z1-t,z1]].forEach(function(q){
+      box(L.small,MAT.brick,q[0],q[1],0,EAV,q[2],q[3]);
+    });
+    box(L.small,MAT.brick,x0+1.5,x0+1.75,0,EAV,z0,z1);
+    box(L.small,MAT.glass,x0+2.4,x0+3.9,0.6,2.1,z1-0.06,z1-0.02);
+    hip(L.small,MAT.tile,x0-0.45,x1+0.45,z0-0.45,z1+0.45,EAV,RG,1.95);
+    lab('당직실 4 500×3 000 · SCADA 7.74 / 탈의실 2.60 m² · ±0.00 = 1457.05',-19.7,RG+1.1,-12.5,'hot');
+  })();
+
+  /* ══ 1인용 화장실 3 600 × 2 500 ══ */
+  (function(){
+    var x0=-14,x1=-10.4,z0=-14.5,z1=-12;
+    box(L.small,MAT.conc2,x0,x1,-2.45,-0.15,z0+0.45,z0+2.05);       /* 정화조 3600×1600 h=2.15 */
+    box(L.small,MAT.brick,x0+0.5,x1-1.3,0,1.80,z0+0.6,z0+1.9);
+    box(L.small,MAT.door,x0+1.0,x0+1.8,0,2.1,z0+0.58,z0+0.62);
+    tri(L.small,MAT.roof, quad([x0+0.3,1.80,z0+0.4],[x1-1.1,1.80,z0+0.4],
+                               [x1-1.1,3.00,z0+2.1],[x0+0.3,3.00,z0+2.1]));
+    lab('1인용 화장실 3 600×2 500 · 정화조 -2.45 · 범례 1.30×2.35×3.0 ↔ 물량 1.3×1.8',-12.2,3.6,-13.3,'hot');
+  })();
+
+  /* ══ TX-10 "양수장 평면도" 17 880 × 5 400 · ±0,00 = 582.22 ══ */
+  (function(){
+    var x0=-30,x1=-12.12,z0=22,z1=27.4;
+    edg(L.ghost,x0,x1,0,2.6,z0,z1,0xe0342b);
+    box(L.ghost,MAT.ghost,x0,x1,0,2.6,z0,z1);
+    lab('TX-10 「양수장 평면도」 17 880 × 5 400 · ±0,00 = 582.22  → 본체(36 000×6 400 · 733.04)와 별개 건물',
+        -21,3.4,24.7,'hot');
+  })();
+
+  /* 축선 · 축 번호 */
+  (function(){
+    var p=[];
+    [AX1,AX2].forEach(function(x){p.push(x,-2.05,-3.4,x,-2.05,9.6)});
+    [ZA,ZB].forEach(function(z){p.push(-8.4,-2.05,z,39.6,-2.05,z)});
+    var g=new THREE.BufferGeometry();
+    g.setAttribute('position',new THREE.Float32BufferAttribute(p,3));
+    L.axis.add(new THREE.LineSegments(g,new THREE.LineBasicMaterial({color:0xe0342b,transparent:true,opacity:0.55})));
+    lab('①',AX1,-2.0,-4.0,'ax'); lab('②',AX2,-2.0,-4.0,'ax');
+    lab('А',-9.4,-2.0,ZA,'ax'); lab('Б',-9.4,-2.0,ZB,'ax');
+    lab('36 000  (하단 치수합 = 총치수) / 상단 치수합 35 650',18,-2.9,-4.4,'hot');
+    lab('6 400  (범례 7.80 / 외곽 7 600 / 단면 6 000 / 8 500)',-13.5,-2.9,3.2,'hot');
+  })();
+
+  /* ── 카메라 ── */
+  var target=new THREE.Vector3(6,0,-1), sph={r:64,th:0.82,ph:1.02}, want=null;
+  function place(){
+    camera.position.set(
+      target.x+sph.r*Math.sin(sph.ph)*Math.sin(sph.th),
+      target.y+sph.r*Math.cos(sph.ph),
+      target.z+sph.r*Math.sin(sph.ph)*Math.cos(sph.th));
+    camera.lookAt(target);
+  }
+  var drag=null;
+  cv.addEventListener('pointerdown',function(e){drag={x:e.clientX,y:e.clientY,pan:e.shiftKey||e.button===2};
+    if(cv.setPointerCapture)cv.setPointerCapture(e.pointerId);});
+  cv.addEventListener('pointerup',function(){drag=null});
+  cv.addEventListener('pointerleave',function(){drag=null});
+  cv.addEventListener('pointermove',function(e){
+    if(!drag)return;
+    var dx=e.clientX-drag.x,dy=e.clientY-drag.y; drag.x=e.clientX; drag.y=e.clientY;
+    if(drag.pan){
+      var dir=new THREE.Vector3(); camera.getWorldDirection(dir);
+      var rt=new THREE.Vector3().crossVectors(new THREE.Vector3(0,1,0),dir).normalize();
+      target.addScaledVector(rt,-dx*sph.r*0.0011).addScaledVector(new THREE.Vector3(0,1,0),dy*sph.r*0.0011);
+    } else { sph.th-=dx*0.006; sph.ph=Math.max(0.06,Math.min(Math.PI/2+0.42,sph.ph-dy*0.006)); }
+    place();
+  });
+  cv.addEventListener('contextmenu',function(e){e.preventDefault()});
+  cv.addEventListener('wheel',function(e){e.preventDefault();
+    sph.r=Math.max(7,Math.min(200,sph.r*(1+(e.deltaY>0?1:-1)*0.09))); place();},{passive:false});
+  var pinch=0;
+  cv.addEventListener('touchmove',function(e){
+    if(e.touches.length===2){
+      var d=Math.sqrt(Math.pow(e.touches[0].clientX-e.touches[1].clientX,2)+
+                      Math.pow(e.touches[0].clientY-e.touches[1].clientY,2));
+      if(pinch){sph.r=Math.max(7,Math.min(200,sph.r*pinch/d)); place();}
+      pinch=d; e.preventDefault();
+    }},{passive:false});
+  cv.addEventListener('touchend',function(){pinch=0});
+
+  /* 표고 평면 */
+  var hiP=null,hiL=null;
+  function plane(o){
+    if(hiP){scene.remove(hiP);hiP=null}
+    if(hiL){hiL.el.parentNode.removeChild(hiL.el); labels.splice(labels.indexOf(hiL),1); hiL=null}
+    if(!o||isNaN(o.y))return;
+    var m=new THREE.Mesh(new THREE.PlaneGeometry(72,50),MAT.hi);
+    m.rotation.x=-Math.PI/2; m.position.set(6,o.y,0); scene.add(m); hiP=m;
+    hiL=lab(o.t,42,o.y,3.2,'ax');
+  }
+
+  function sync(){
+    var S=STATE, m=S.mode, cf=(m==='cf');
+    var showPS = (m!=='sub'), showSub=(m!=='ps');
+    L.roof.visible  = showPS && !!S.layers.roof;
+    L.wall.visible  = showPS && !!S.layers.wall;
+    L.sub.visible   = showPS && !!S.layers.sub;
+    L.mech.visible  = showPS && !!S.layers.mech;
+    L.fore.visible  = showPS && !!S.layers.fore;
+    L.trafo.visible = showSub && !!S.layers.trafo;
+    L.small.visible = (m==='site'||cf) && !!S.layers.small;
+    L.site.visible  = (m==='site'||cf) && !!S.layers.site;
+    L.ghost.visible = !!S.layers.ghost || cf;
+    L.axis.visible  = showPS;
+    FADE.forEach(function(x){x.transparent=cf; x.opacity=cf?0.40:1; x.needsUpdate=true});
+    labels.forEach(function(o){
+      var hide='';
+      if(o.grp==='rm' && cf) hide='';
+      o.el.dataset.hide=hide;
+    });
+  }
+  function cut(){
+    var a=[];
+    if(STATE.cutZ<19.8){planeZ.constant=STATE.cutZ; a.push(planeZ)}
+    if(STATE.cutX<37.8){planeX.constant=STATE.cutX; a.push(planeX)}
+    renderer.clippingPlanes=a;
+  }
+  function fly(c){want={x:c[0],y:c[1],z:c[2],r:c[3]}}
+  VIEW={sync:sync,cut:cut,fly:fly,plane:plane};
+
+  function tick(){
+    var w=cv.clientWidth,h=cv.clientHeight;
+    if(w>0&&h>0&&(cv.width!==Math.round(w*renderer.getPixelRatio())||cv.height!==Math.round(h*renderer.getPixelRatio()))){
+      renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix();
+    }
+    if(want){
+      target.x+=(want.x-target.x)*0.09; target.y+=(want.y-target.y)*0.09;
+      target.z+=(want.z-target.z)*0.09; sph.r+=(want.r-sph.r)*0.09; place();
+      if(Math.abs(want.r-sph.r)<0.08&&Math.abs(want.x-target.x)<0.08) want=null;
+    }
+    for(var i=0;i<labels.length;i++){
+      var o=labels[i], p=o.v.clone().project(camera);
+      var vis=p.z<1 && !o.el.dataset.hide;
+      o.el.style.display=vis?'block':'none';
+      if(vis) o.el.style.transform='translate(-50%,-50%) translate('+
+        ((p.x*0.5+0.5)*w).toFixed(1)+'px,'+((-p.y*0.5+0.5)*h).toFixed(1)+'px)';
+    }
+    renderer.render(scene,camera);
+    requestAnimationFrame(tick);
+  }
+  place(); sync(); cut(); tick();
+
+}catch(err){
+  var v=document.getElementById('view');
+  var e=document.createElement('div'); e.id='err';
+  e.innerHTML='<b>3D 뷰포트를 초기화하지 못했습니다.</b><br>'+(err&&err.message?err.message:String(err))+
+    '<br><br>좌측 표고 스택과 우측 부적합 목록은 정상 동작합니다. WebGL을 지원하는 브라우저에서 파일을 직접 열어 주십시오.';
+  if(v) v.appendChild(e);
+  if(window.console) console.error(err);
+}
+})();
+</script>
+
+<!-- 검토자료 패널 (docviewer) -->
+<script>window.LOKHUR_DOC={"site": "lokhur-1", "label": "로후르-1", "mount": "header", "push": true};</script>
+<script src="../assets/docviewer.js"></script>
+</body>
+</html>

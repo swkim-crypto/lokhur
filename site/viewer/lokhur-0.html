@@ -1,0 +1,616 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>로후르-0 양수장 · 도면 정합성 3D 검토</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0d1218; --panel:#141b24; --panel2:#1b232e; --rule:#2a3542;
+    --ink:#e7edf4; --ink2:#9aa9b8; --ink3:#657687;
+    --axis:#e0342b; --dim:#3d7fe0; --collect:#22a862; --press:#c04aa6; --timber:#dda52e;
+    --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+    --disp:'Archivo Narrow','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
+    --body:system-ui,-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:var(--body);overflow:hidden}
+  body{display:flex;flex-direction:column}
+  header{flex:0 0 auto;border-bottom:1px solid var(--rule);padding:9px 14px;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+  header h1{margin:0;font-family:var(--disp);font-weight:700;font-size:15px;letter-spacing:.02em}
+  header .sub{font-family:var(--mono);font-size:10.5px;color:var(--ink3);letter-spacing:.04em}
+  header .warn{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--axis);border:1px solid var(--axis);padding:2px 7px}
+  main{flex:1 1 auto;display:flex;min-height:0}
+  #rail{flex:0 0 206px;border-right:1px solid var(--rule);display:flex;flex-direction:column;min-height:0;background:var(--panel)}
+  #rail .cap,#side .cap{padding:8px 11px 6px;font-family:var(--disp);font-size:11px;font-weight:600;letter-spacing:.09em;
+    text-transform:uppercase;color:var(--ink2);border-bottom:1px solid var(--rule)}
+  #side .cap{display:flex;justify-content:space-between}
+  #side .cap u{text-decoration:none;font-family:var(--mono);color:var(--axis)}
+  #stack{flex:1 1 auto;overflow-y:auto;padding:4px 0 12px}
+  .ev{display:grid;grid-template-columns:58px 12px 1fr;align-items:center;gap:6px;padding:3px 9px;cursor:pointer;border-left:2px solid transparent}
+  .ev:hover,.ev.on{background:var(--panel2);border-left-color:var(--axis)}
+  .ev b{font-family:var(--mono);font-size:11.5px;font-weight:500;text-align:right}
+  .ev .tk{height:1px;background:var(--ink3)}
+  .ev.cf .tk{background:var(--axis);height:2px}
+  .ev.cf b{color:var(--axis)}
+  .ev span{font-size:10.5px;color:var(--ink2);line-height:1.25}
+  .ev em{display:block;font-family:var(--mono);font-size:9px;color:var(--ink3);font-style:normal}
+  .grp{padding:10px 11px 3px;font-family:var(--disp);font-size:10px;letter-spacing:.12em;color:var(--ink3);text-transform:uppercase}
+  #view{flex:1 1 auto;position:relative;min-width:0}
+  canvas{display:block;width:100%;height:100%}
+  #labels{position:absolute;inset:0;pointer-events:none}
+  .lbl{position:absolute;font-family:var(--mono);font-size:10px;color:var(--ink2);white-space:nowrap;
+    text-shadow:0 0 4px var(--bg),0 0 4px var(--bg)}
+  .lbl.ax{color:var(--axis);font-weight:600;font-size:10.5px}
+  .lbl.rm{color:var(--ink);background:rgba(13,18,24,.72);padding:1px 4px;border:1px solid var(--rule);font-size:9.5px}
+  #modes{position:absolute;top:12px;left:12px;display:flex;border:1px solid var(--rule);background:rgba(13,18,24,.86)}
+  #modes button{appearance:none;background:none;border:0;border-right:1px solid var(--rule);color:var(--ink2);
+    font-family:var(--disp);font-size:11.5px;font-weight:600;letter-spacing:.05em;padding:7px 13px;cursor:pointer}
+  #modes button:last-child{border-right:0}
+  #modes button.on{background:var(--ink);color:var(--bg)}
+  #modes button:focus-visible{outline:2px solid var(--dim);outline-offset:-2px}
+  #legend{position:absolute;right:12px;bottom:12px;background:rgba(13,18,24,.86);border:1px solid var(--rule);
+    padding:8px 10px;font-family:var(--mono);font-size:9.5px;color:var(--ink2);line-height:1.75}
+  #legend i{display:inline-block;width:16px;height:3px;margin-right:6px;vertical-align:middle}
+  #hint{position:absolute;left:12px;bottom:12px;font-family:var(--mono);font-size:9.5px;color:var(--ink3)}
+  #err{position:absolute;inset:52px 12px auto 12px;border:1px solid var(--axis);background:rgba(224,52,43,.09);
+    padding:12px 14px;font-family:var(--mono);font-size:11px;color:var(--ink);line-height:1.7}
+  #err b{color:var(--axis)}
+  #side{flex:0 0 320px;border-left:1px solid var(--rule);display:flex;flex-direction:column;min-height:0;background:var(--panel)}
+  #list{flex:1 1 auto;overflow-y:auto}
+  .it{border-bottom:1px solid var(--rule);padding:9px 12px;cursor:pointer}
+  .it:hover{background:var(--panel2)}
+  .it.on{background:var(--panel2);box-shadow:inset 3px 0 0 var(--axis)}
+  .it h3{margin:0 0 3px;font-size:12px;font-weight:600;line-height:1.35;display:flex;gap:7px}
+  .it h3 u{text-decoration:none;font-family:var(--mono);font-size:10px;color:var(--ink3);flex:0 0 auto;padding-top:1px}
+  .it .sv{display:inline-block;font-family:var(--mono);font-size:8.5px;letter-spacing:.06em;padding:1px 5px;margin-bottom:5px;border:1px solid currentColor}
+  .sv.a{color:var(--axis)} .sv.b{color:var(--timber)} .sv.c{color:var(--ink3)}
+  .it p{margin:0;font-size:11px;line-height:1.6;color:var(--ink2);display:none}
+  .it.on p{display:block}
+  .it p b{color:var(--ink);font-weight:600}
+  .it p code{font-family:var(--mono);font-size:10.5px;color:var(--dim)}
+  footer{flex:0 0 auto;border-top:1px solid var(--rule);padding:7px 12px;display:flex;gap:15px;align-items:center;flex-wrap:wrap;background:var(--panel)}
+  footer .ttl{font-family:var(--disp);font-size:10px;letter-spacing:.12em;color:var(--ink3);text-transform:uppercase}
+  .chip{font-family:var(--mono);font-size:10px;color:var(--ink2);border:1px solid var(--rule);padding:3px 8px;cursor:pointer;user-select:none}
+  .chip.on{color:var(--ink);border-color:var(--ink2);background:var(--panel2)}
+  .cut{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:10px;color:var(--ink2)}
+  .cut input[type=range]{width:100px;accent-color:var(--axis)}
+  .cut output{color:var(--axis);min-width:44px;display:inline-block}
+  ::-webkit-scrollbar{width:9px}::-webkit-scrollbar-track{background:var(--panel)}::-webkit-scrollbar-thumb{background:var(--rule)}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+  @media (max-width:1080px){#rail{flex-basis:172px}#side{flex-basis:252px}}
+</style>
+<link rel="stylesheet" href="../assets/docviewer.css">
+</head>
+<body>
+<header>
+  <h1>로후르-0 양수장 &mdash; 도면 정합성 3D 검토</h1>
+  <span class="sub">타지키스탄 루다키 지구 / 실시설계 / 두샨베-2026 &middot; 원본 축척 1:100</span>
+  <span class="warn" id="cnt">부적합 &mdash;</span>
+</header>
+<main>
+  <aside id="rail"><div class="cap">표고 스택</div><div id="stack"></div></aside>
+  <section id="view">
+    <canvas id="cv"></canvas>
+    <div id="labels"></div>
+    <div id="modes">
+      <button data-m="ar" class="on">건축 AR</button>
+      <button data-m="tx">기계 TX</button>
+      <button data-m="ov">중첩 비교</button>
+    </div>
+    <div id="legend">
+      <div><i style="background:#8b96a3"></i>철근콘크리트</div>
+      <div><i style="background:#c9b79c"></i>조적 · 마감</div>
+      <div><i style="background:#dda52e"></i>목조 지붕틀</div>
+      <div><i style="background:#3d7fe0"></i>흡입관 D1200</div>
+      <div><i style="background:#c04aa6"></i>압력수송관 D1200</div>
+      <div><i style="background:#22a862"></i>집수관 · 흡수정</div>
+      <div><i style="background:#e0342b"></i>기계도면 외곽 · 축선</div>
+    </div>
+    <div id="hint">드래그 회전 &middot; 휠 확대 &middot; Shift+드래그 이동</div>
+  </section>
+  <aside id="side"><div class="cap"><span>부적합 · 질의 항목</span><u id="cnt2">&mdash;</u></div><div id="list"></div></aside>
+</main>
+<footer>
+  <span class="ttl">레이어</span>
+  <span class="chip on" data-l="roof">지붕</span>
+  <span class="chip on" data-l="wall">벽체·창호</span>
+  <span class="chip on" data-l="slab">슬래브</span>
+  <span class="chip on" data-l="sub">지하·기초</span>
+  <span class="chip on" data-l="mech">펌프·배관</span>
+  <span class="chip on" data-l="annex">부속동 (TX)</span>
+  <span class="chip" data-l="scada">별동 (기계실 파일)</span>
+  <span class="ttl" style="margin-left:6px">절단</span>
+  <label class="cut">A&ndash;A <input type="range" id="cutZ" min="-1" max="8" step="0.1" value="8"><output id="oz">off</output></label>
+  <label class="cut">B&ndash;B <input type="range" id="cutX" min="-8" max="31" step="0.2" value="31"><output id="ox">off</output></label>
+</footer>
+<script>
+/* ═══ A. 데이터 + 패널 (three.js 없이도 단독 동작) ═══ */
+var STATE = {mode:'ar', layers:{roof:1,wall:1,slab:1,sub:1,mech:1,annex:1,scada:0}, cutZ:8, cutX:31};
+var VIEW = null;   /* 3D 훅. 스크립트 C가 성공하면 주입됨 */
+
+var EV = [
+  {g:'상부 구조'},
+  {v:'+7.300', n:'지붕 능선 상단',        s:'AR-3·4·5·8·9'},
+  {v:'+7.000', n:'능선 구조 상단',        s:'AR-4·9'},
+  {v:'+6.200', n:'미정의 수평선',          s:'AR-5·8', cf:1},
+  {v:'+5.500', n:'처마 (우)',              s:'AR-5', cf:1},
+  {v:'+5.200', n:'처마 (좌) · 벽 상단',    s:'AR-5·8', cf:1},
+  {v:'+4.800', n:'천장 · 지붕평면 기준',   s:'AR-7·9', cf:1},
+  {v:'+4.200', n:'처마 표기',              s:'AR-3·4', cf:1},
+  {v:'+3.800', n:'처마 표기',              s:'AR-3·4·5·8', cf:1},
+  {g:'개구부'},
+  {v:'+3.300', n:'창-1 상단',              s:'AR-3·8·9'},
+  {v:'+3.000', n:'문 DH-1 상단',           s:'AR-5·9'},
+  {v:'+1.500', n:'창-1 하단',              s:'AR-3·8·9'},
+  {g:'기준 · 하부'},
+  {v:'±0.000', n:'기준층 바닥 FL',         s:'전 도면'},
+  {v:'-0.300', n:'지반선 GL',              s:'AR-3·5·9'},
+  {v:'-2.000', n:'펌프 기초 상단 (건축)',  s:'AR-8', cf:1},
+  {v:'-2.200', n:'피트 바닥',              s:'AR-8·9'},
+  {v:'-2.450', n:'기초 하단',              s:'AR-9'},
+  {v:'-2.600', n:'펌프 기초 상단 (기계)',  s:'TX-3·5', cf:1},
+  {v:'-2.800', n:'펌프 기초 상단 (기계)',  s:'TX-3·5', cf:1},
+  {g:'±0.000의 절대표고'},
+  {v:'1457.05', n:'기초 단면 3-3 / 4-4',   s:'기계실 AC-10', cf:1, abs:1},
+  {v:'750.34',  n:'유압기계 배치 계획도',  s:'RP-11', cf:1, abs:1},
+  {v:'730.34',  n:'수력기계 배치도',       s:'TX-3·5', cf:1, abs:1},
+  {v:'714.20',  n:'종단면도 건물 상부',    s:'RP-9', cf:1, abs:1},
+  {v:'583.32',  n:'-2.600 = 580.72 역산',  s:'TX-5', cf:1, abs:1},
+  {v:'582.22',  n:'-1.250 = 580.97 역산',  s:'TX-5', cf:1, abs:1},
+  {v:'579.62',  n:'드레인 펌프 기준선',    s:'RP-11', cf:1, abs:1},
+  {v:'548.56',  n:'기초 하부 장치 (본문)', s:'RP-8', cf:1, abs:1}
+];
+
+var ISSUES = [
+ {id:'01',sv:'a',t:'전기실·계량실 부속동이 건축 도면에 없음', cam:[-6,2,3.6,26], mode:'ov',
+  p:'기계 도면(TX-3·5)은 축① 서쪽에 <b>6 400 × 6 600 부속동</b>(홀·계단·전기실·계량실, 출입문 DN-1~DN-4)을 전제하고 그 안에 배전·계측 설비를 배치했다. 그러나 건축 도면 전 10장에는 이 부속동의 평면·입면·단면·기초가 <b>한 장도 없다</b>. 건축 기술경제지표(건축면적 <code>231.05 m²</code>, 유효면적 <code>201.30 m²</code>)도 본체 30.4×7.6만으로 정확히 산출되어 부속동 약 42 m²가 <b>면적·물량·공사비에서 전부 누락</b>되었다. 기존 펌프장 본체만 존치·개보수하고 부속동은 설계에서 빠진 것으로 판단된다.'},
+ {id:'02',sv:'a',t:'본체 폭 7 200(건축) vs 6 600(기계) — 600 차', cam:[15,2,7,20], mode:'ov',
+  p:'건축 평면도 AR-6은 축 A–B <code>7 200</code>, 단면 B-B(AR-9)와 정면도(AR-5)도 <code>7 200</code>. 반면 기계 배치도 TX-3·5와 RP-11은 <code>6 600</code>. 종단면도 RP-9는 다시 <code>8 000</code>. 같은 건물의 폭이 <b>3가지</b>다. 6 600을 적용하면 전동기(폭 1 960)와 B측 흡수 트렌치(1 500) 사이 유지관리 통로가 확보되지 않는다.'},
+ {id:'03',sv:'a',t:'종방향 축간 치수 합이 총 치수와 불일치', cam:[15,1,-2,34],
+  p:'TX-5 평면도의 구간 치수는 <code>6 850 + 7 750 + 7 550 + 7 500 + 6 850 = 36 500</code>인데 전체 치수는 <code>30 000</code>으로 기입되어 <b>6 500 mm 초과</b>한다. 상단 치수열은 <code>6 400+7 750+7 350+7 560+6 450 = 35 510</code>으로 또 다르다. 건물 길이 자체도 <code>27 100</code>(AR-6) / <code>27 900</code>·<code>28 300</code>(RP-11) / <code>30 000</code>(AR-6·TX-5)로 4가지가 혼재한다. 결정적으로 일반 데이터 시트(AR-1) 본문은 주요 구조를 <b>"천장 18.5 m × 7.2 m"</b>로, 기계실을 <b>"7.0 m 높이의 세 층"</b>으로 서술한다. 도면상 건물은 <code>30 m</code> 연장의 <b>지상 1층 + 지하 피트</b>이므로 길이·층수 모두 본문과 맞지 않는다.'},
+ {id:'04',sv:'a',t:'±0.000의 절대표고가 도면마다 다름 (8종)', cam:[15,3,3.6,40],
+  p:'같은 프로젝트에서 기준면이 <code>1457.05</code>(기계실 AC-10) / <code>750.34</code>(RP-11) / <code>730.34</code>(TX-3·5) / <code>714.20</code>(RP-9) / <code>583.32</code>·<code>582.22</code>(TX-5 역산) / <code>579.62</code>(RP-11) / <code>548.56</code>(RP-8)로 갈린다. RP-8은 "상대 높이 ±0,00은 절대 높이 548,56에 해당한다"고 <b>본문으로 명기</b>했다. 부지 계획도 지반고는 700~735 m대, 종단면도 건물은 711~714 m대다. <b>단일 기준점 재정의 없이는 어떤 표고도 신뢰할 수 없다.</b> 좌측 표고 스택에서 전체 목록 확인.'},
+ {id:'05',sv:'a',t:'펌프 기초 상단 -2.000 vs -2.600 / -2.800', cam:[11,-2,2.4,14], mode:'ov',
+  p:'건축 단면 A-A(AR-8)는 펌프 기초 상단 <code>-2.000</code>, 피트 바닥 <code>-2.200</code>. 기계 배치도(TX-3·5)는 <code>-2.600</code>과 <code>-2.800</code>을 동시에 표기. 기초 도면 RP-8은 기초 하단 <code>-1.000</code>. 최대 <b>800 mm 차</b>로, 흡입 중심 표고가 바뀌면 유효흡입수두가 직접 영향을 받는다(펌프 NPSHr <code>7.8 m</code>).'},
+ {id:'06',sv:'a',t:'호이스트 10 t < 펌프-전동기 세트 11.7 t', cam:[11,3,2.4,16],
+  p:'장비 규격서: 주펌프 KQSN800-M17S + YKK560-6, <b>개당 11 696 kg</b>(4대 46 784 kg). 양중설비는 <code>T3 10-921 · 10톤 이하 전동 호이스트</code> 1세트. <b>정격 초과</b>다. 펌프 3 846 kg / 전동기 7 850 kg 분리 인출이면 각각 10 t 이내이나 도면·시방에 분리 인출 절차가 없다.'},
+ {id:'07',sv:'a',t:'목조 지붕틀에 크레인 거더가 없음', cam:[11,5,3.6,16],
+  p:'단면 A-A·B-B의 지붕은 <code>각재 서까래 30×120 @400</code> + 아연도금 강판의 <b>목조 트러스</b>이고 천장 슬래브는 +4.800. 호이스트를 걸 <b>주행 거더·레일·지지 기둥이 도면에 전무</b>하다. 10톤급 양중을 목조 지붕틀에 매달 수 없으므로 별도 크레인 거더 구조 설계가 필요하다. 훅 유효 높이도 검증 대상: 펌프 전고 HD <code>2 200</code> + 슬링 + 인출 여유 vs 천장 4.800.'},
+ {id:'08',sv:'b',t:'처마 표고가 도면별 5종 (3.800~5.500)', cam:[3,5,3.6,18],
+  p:'<code>3.800</code>·<code>4.200</code>(AR-3·4 입면) / <code>4.800</code>(AR-7 지붕평면 기준높이, AR-9 단면) / <code>5.200</code>(AR-5 좌측, AR-8) / <code>5.500</code>(AR-5 우측). 정면도 A-B는 좌우 처마가 <code>5.200</code>과 <code>5.500</code>으로 <b>비대칭</b>인데 지붕 평면도는 대칭 양구배다. 본 모형은 5.200 / 7.300으로 세웠다.'},
+ {id:'09',sv:'b',t:'지붕 경사 i=0.25 vs 형상 실측 0.58~0.61', cam:[15,7,3.6,22],
+  p:'AR-7 지붕 평면도는 전 구간 <code>i = 0.25</code>(약 14°). 그러나 단면 B-B의 처마 4.800 → 능선 7.000, 반폭 3 600으로 계산하면 <code>0.611</code>(31°), 정면도 A-B(5.200→7.300)는 <code>0.583</code>(30°)이다. i=0.25가 방수층 물흘림 구배라면 그렇게 명기해야 한다.'},
+ {id:'10',sv:'b',t:'출입구 1개소 — 피난 동선 없음', cam:[0,2,3.6,14],
+  p:'개구부 사양표의 문은 <code>DH-1 3 000×3 000, 수량 1</code>이 유일하다. 연장 30 m·유효 201 m²의 기계실에 <b>출구가 한 곳</b>이며, 지하 피트(-2.200)에서 지상으로의 계단도 좌측 1개소뿐이다. 지진구역 <code>9포인트</code>로 명기된 지역이므로 2방향 피난 확보 여부를 확인해야 한다.'},
+ {id:'11',sv:'b',t:'펌프 모델·수량·중심 간격 불일치', cam:[15,-1,2.4,26], mode:'ov',
+  p:'규격서는 <code>KQSN800-M17S</code> 4대(Q 5 184 m³/h, H 50 m, 1 000 kW), 특성곡선 도면(RP-6) 표제는 <code>Д2000-21 (16НДн)</code>. 철거 물량표는 <code>D2600-80</code>·<code>D4000-85</code>·<code>D4500-90</code> 세트가 <b>합계 8세트</b>로 계상되나 평면도의 기기는 №1~№4 <b>4대</b>다. 중심 간격도 <code>4 900</code>(TX-5) / <code>6 100</code>(RP-11) / <code>6 850~7 750</code>(TX-5 축간)로 갈린다. 본 모형은 6 100으로 배치했다.'},
+ {id:'12',sv:'c',t:'"기계실" 파일이 별개 프로젝트 도면', cam:[10,2,-12.5,20], layer:'scada',
+  p:'세 번째 파일은 <code>4 500 × 3 000</code>, SCADA실 7.74 m² / 탈의실 2.6 m²의 소형 별동이다. 표제란이 "로후르-0 펌프장 기계실"과 "루다키아 가압 펌프장 / 보기 지구 상수도 시설 확장 공사", "로후르-0 관측소"로 <b>혼재</b>하고, 설계자 성명도 시트별로 한국식(홍길동·김철수·이영희·박민수)과 타직식(F. 리리자디·사이미에브·쇼이에프)이 섞여 있다. 지진 조건도 건축 파일은 <code>9포인트</code>, 이 파일은 <code>7구역·진도 7</code>로 상충한다. 지붕 경사 표기 <code>22°</code>와 표고차(2.60→3.50, 반폭 1 500 → 31°)도 맞지 않는다. <b>양수장 본체 기계실 도면이 아니다.</b>'}
+];
+
+/* ── 표고 스택 ── */
+(function(){
+  var stack=document.getElementById('stack');
+  EV.forEach(function(e){
+    if(e.g){ var h=document.createElement('div'); h.className='grp'; h.textContent=e.g; stack.appendChild(h); return; }
+    var d=document.createElement('div');
+    d.className='ev'+(e.cf?' cf':'');
+    d.innerHTML='<b>'+e.v+'</b><i class="tk"></i><span>'+e.n+(e.cf?' ⚠':'')+'<em>'+e.s+'</em></span>';
+    d.onclick=function(){
+      var was=d.classList.contains('on');
+      [].forEach.call(document.querySelectorAll('.ev'),function(x){x.classList.remove('on')});
+      if(was){ if(VIEW) VIEW.plane(null); return; }
+      d.classList.add('on');
+      if(VIEW) VIEW.plane(e.abs?null:{y:parseFloat(e.v.replace('±','').replace('+','')), t:e.v});
+    };
+    stack.appendChild(d);
+  });
+})();
+
+/* ── 부적합 목록 ── */
+(function(){
+  var list=document.getElementById('list');
+  ISSUES.forEach(function(it){
+    var d=document.createElement('div'); d.className='it';
+    d.innerHTML='<h3><u>'+it.id+'</u>'+it.t+'</h3><span class="sv '+it.sv+'">'+
+      (it.sv==='a'?'중대':it.sv==='b'?'확인 필요':'문서 정합')+'</span><p>'+it.p+'</p>';
+    d.onclick=function(){
+      var was=d.classList.contains('on');
+      [].forEach.call(document.querySelectorAll('.it'),function(x){x.classList.remove('on')});
+      if(was) return;
+      d.classList.add('on');
+      if(it.layer && !STATE.layers[it.layer]){
+        STATE.layers[it.layer]=1;
+        var c=document.querySelector('.chip[data-l="'+it.layer+'"]'); if(c) c.classList.add('on');
+      }
+      if(it.mode) setMode(it.mode);
+      if(VIEW){ VIEW.sync(); VIEW.fly(it.cam); }
+      d.scrollIntoView({block:'nearest',behavior:'smooth'});
+    };
+    list.appendChild(d);
+  });
+  document.getElementById('cnt').textContent='부적합 '+ISSUES.length+'건';
+  document.getElementById('cnt2').textContent=ISSUES.length;
+})();
+
+/* ── 모드 · 레이어 · 절단 ── */
+function setMode(m){
+  STATE.mode=m;
+  [].forEach.call(document.querySelectorAll('#modes button'),function(b){
+    b.classList.toggle('on', b.dataset.m===m);
+  });
+  if(VIEW) VIEW.sync();
+}
+[].forEach.call(document.querySelectorAll('#modes button'),function(b){
+  b.onclick=function(){ setMode(b.dataset.m); };
+});
+[].forEach.call(document.querySelectorAll('.chip'),function(c){
+  c.onclick=function(){
+    var k=c.dataset.l;
+    STATE.layers[k]=STATE.layers[k]?0:1;
+    c.classList.toggle('on', !!STATE.layers[k]);
+    if(VIEW) VIEW.sync();
+  };
+});
+(function(){
+  var cz=document.getElementById('cutZ'), cx=document.getElementById('cutX');
+  function upd(){
+    STATE.cutZ=parseFloat(cz.value); STATE.cutX=parseFloat(cx.value);
+    document.getElementById('oz').textContent = STATE.cutZ<7.9 ? STATE.cutZ.toFixed(1)+' m' : 'off';
+    document.getElementById('ox').textContent = STATE.cutX<30.9 ? STATE.cutX.toFixed(1)+' m' : 'off';
+    if(VIEW) VIEW.cut();
+  }
+  cz.oninput=cx.oninput=upd; upd();
+})();
+</script>
+<script src="../assets/three.min.js"></script>
+<script>
+/* ═══ C. 3D 장면 (실패해도 A의 패널은 그대로 동작) ═══ */
+(function(){
+try{
+  if(typeof THREE==='undefined') throw new Error('three.js가 로드되지 않았습니다.');
+
+  var cv=document.getElementById('cv');
+  var renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  renderer.setClearColor(0x0d1218);
+  var scene=new THREE.Scene();
+  scene.fog=new THREE.Fog(0x0d1218,62,180);
+  var camera=new THREE.PerspectiveCamera(42,1,0.4,600);
+
+  scene.add(new THREE.HemisphereLight(0xcfe0f0,0x1a2129,0.9));
+  var d1=new THREE.DirectionalLight(0xffffff,0.78); d1.position.set(-24,34,20); scene.add(d1);
+  var d2=new THREE.DirectionalLight(0x93b4d8,0.30); d2.position.set(26,12,-22); scene.add(d2);
+
+  var planeZ=new THREE.Plane(new THREE.Vector3(0,0,-1),8);
+  var planeX=new THREE.Plane(new THREE.Vector3(-1,0,0),31);
+
+  function M(c,o){ var p={color:c,roughness:0.85,metalness:0}; for(var k in (o||{})) p[k]=o[k];
+                   return new THREE.MeshStandardMaterial(p); }
+  var MAT={
+    conc:M(0x8b96a3), conc2:M(0x76818d), brick:M(0xc9b79c,{roughness:0.95}),
+    roof:M(0xa5b0bb,{roughness:0.42,metalness:0.45}), timber:M(0xdda52e,{roughness:0.75}),
+    glass:M(0x63a8dc,{transparent:true,opacity:0.34,roughness:0.08,metalness:0.1}),
+    door:M(0x5c6a78,{metalness:0.5,roughness:0.45}), steel:M(0xb4bec9,{metalness:0.72,roughness:0.32}),
+    motor:M(0x69798a,{metalness:0.35,roughness:0.55}), suct:M(0x3d7fe0,{roughness:0.45,metalness:0.25}),
+    press:M(0xc04aa6,{roughness:0.45,metalness:0.25}), coll:M(0x22a862,{roughness:0.5}),
+    water:M(0x1d4a72,{transparent:true,opacity:0.55,roughness:0.15}), soil:M(0x2c333c,{roughness:1}),
+    ghost:new THREE.MeshBasicMaterial({color:0xe0342b,transparent:true,opacity:0.10,side:THREE.DoubleSide}),
+    hi:new THREE.MeshBasicMaterial({color:0xe0342b,transparent:true,opacity:0.20,side:THREE.DoubleSide})
+  };
+  var FADE=[MAT.brick,MAT.roof,MAT.conc,MAT.conc2,MAT.timber];
+
+  function box(g,mat,x0,x1,y0,y1,z0,z1){
+    var m=new THREE.Mesh(new THREE.BoxGeometry(Math.abs(x1-x0)||0.01,Math.abs(y1-y0)||0.01,Math.abs(z1-z0)||0.01),mat);
+    m.position.set((x0+x1)/2,(y0+y1)/2,(z0+z1)/2); g.add(m); return m;
+  }
+  function cyl(g,mat,r,h,x,y,z,rx,ry,rz){
+    var m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,20),mat);
+    m.position.set(x,y,z); m.rotation.set(rx||0,ry||0,rz||0); g.add(m); return m;
+  }
+  function tri(g,mat,list){
+    var pos=[];
+    list.forEach(function(t){ t.forEach(function(v){ pos.push(v[0],v[1],v[2]); }); });
+    var geo=new THREE.BufferGeometry();
+    geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+    geo.computeVertexNormals();
+    var m=new THREE.Mesh(geo,mat); g.add(m); return m;
+  }
+  function quad(a,b,c,d){ return [[a,b,c],[a,c,d]]; }
+  function edg(g,x0,x1,y0,y1,z0,z1,col){
+    var e=new THREE.LineSegments(
+      new THREE.EdgesGeometry(new THREE.BoxGeometry(Math.abs(x1-x0),Math.abs(y1-y0),Math.abs(z1-z0))),
+      new THREE.LineBasicMaterial({color:col}));
+    e.position.set((x0+x1)/2,(y0+y1)/2,(z0+z1)/2); g.add(e); return e;
+  }
+
+  var labels=[], labHost=document.getElementById('labels');
+  function lab(text,x,y,z,cls){
+    var el=document.createElement('div'); el.className='lbl '+(cls||''); el.textContent=text;
+    labHost.appendChild(el);
+    var o={el:el,v:new THREE.Vector3(x,y,z),grp:cls||''}; labels.push(o); return o;
+  }
+
+  /* ── 레이어 그룹 ── */
+  var L={roof:new THREE.Group(),wall:new THREE.Group(),slab:new THREE.Group(),
+         sub:new THREE.Group(),mech:new THREE.Group(),annex:new THREE.Group(),
+         scada:new THREE.Group(),axis:new THREE.Group(),ghost:new THREE.Group()};
+  for(var k in L) scene.add(L[k]);
+
+  /* ── 기준 치수 (도면 기재값) ── */
+  var X0=-0.2,X1=30.2,Z0=-0.2,Z1=7.4, IX0=0.2,IX1=29.8,IZ0=0.2,IZ1=7.0;
+  var EAVE=5.2, CEIL=4.8, RIDGE=7.3, PIT=-2.20, FOOT=-2.45;
+  var GRIDX=[0,6,12,18,24,30], PUMPX=[4.9,11.0,17.1,23.2];
+
+  /* 지반 */
+  var gr=new THREE.Mesh(new THREE.PlaneGeometry(170,140),MAT.soil);
+  gr.rotation.x=-Math.PI/2; gr.position.set(12,-0.3,3.6); L.sub.add(gr);
+
+  /* 지하 · 기초 */
+  box(L.sub,MAT.conc2,X0-0.3,X1+0.3,FOOT,PIT,Z0-0.3,Z1+0.3);
+  box(L.sub,MAT.conc,X0,IX0,PIT,0,Z0,Z1);
+  box(L.sub,MAT.conc,IX1,X1,PIT,0,Z0,Z1);
+  box(L.sub,MAT.conc,IX0,IX1,PIT,0,Z0,IZ0);
+  box(L.sub,MAT.conc,IX0,IX1,PIT,0,IZ1,Z1);
+  PUMPX.forEach(function(cx){ box(L.sub,MAT.conc2,cx-2.3,cx+2.3,PIT,-2.00,1.4,3.4); });
+  box(L.sub,MAT.coll,0.6,29.4,PIT,-2.05,4.6,6.1);
+  box(L.sub,MAT.water,0.6,29.4,PIT+0.03,-2.10,4.6,6.1);
+  box(L.sub,MAT.conc2,1.0,1.6,PIT-0.25,-0.60,6.2,6.8);
+
+  /* ±0.000 슬래브 (펌프 개구부 4개소) + 천장 슬래브 */
+  box(L.slab,MAT.conc,IX0,IX1,-0.2,0,IZ0,1.0);
+  box(L.slab,MAT.conc,IX0,IX1,-0.2,0,6.0,IZ1);
+  var prev=IX0;
+  PUMPX.forEach(function(cx){ box(L.slab,MAT.conc,prev,cx-2.3,-0.2,0,1.0,6.0); prev=cx+2.3; });
+  box(L.slab,MAT.conc,prev,IX1,-0.2,0,1.0,6.0);
+  box(L.slab,MAT.conc,IX0,IX1,CEIL-0.15,CEIL,IZ0,IZ1);
+
+  /* 외벽 + 창-1 (3500×1800, 1.500~3.300, 장변 5개소씩) */
+  var SILL=1.5,HEAD=3.3, piers=[[X0,1.25]];
+  for(var kk=0;kk<5;kk++) piers.push([6*kk+4.75, kk===4?X1:6*kk+7.25]);
+  [[Z0,IZ0],[IZ1,Z1]].forEach(function(pr,side){
+    var za=pr[0], zb=pr[1];
+    box(L.wall,MAT.brick,X0,X1,0,SILL,za,zb);
+    box(L.wall,MAT.brick,X0,X1,HEAD,EAVE,za,zb);
+    piers.forEach(function(p){ box(L.wall,MAT.conc,p[0],p[1],SILL,HEAD,za,zb); });
+    for(var i=0;i<5;i++){
+      var a=6*i+1.25,b=6*i+4.75;
+      box(L.wall,MAT.glass,a,b,SILL,HEAD, side?za+0.14:zb-0.18, side?za+0.18:zb-0.14);
+    }
+  });
+  box(L.wall,MAT.brick,IX1,X1,0,EAVE,Z0,Z1);
+  box(L.wall,MAT.brick,X0,IX0,0,EAVE,Z0,2.1);
+  box(L.wall,MAT.brick,X0,IX0,0,EAVE,5.1,Z1);
+  box(L.wall,MAT.brick,X0,IX0,3.0,EAVE,2.1,5.1);
+  box(L.wall,MAT.door,X0+0.13,X0+0.19,0,3.0,2.1,5.1);
+  box(L.slab,MAT.conc,-3.2,X0,-0.30,0,1.6,6.0);
+  [2.3,4.6].forEach(function(zp){ box(L.wall,MAT.brick,IX0,IX0+2.2,0,3.0,zp,zp+0.3); });
+  box(L.wall,MAT.brick,IX0+2.2,IX0+2.5,0,3.0,IZ0,IZ1);
+  for(var st=0;st<10;st++) box(L.slab,MAT.conc,3.0,4.0,-2.2+st*0.22,-2.2+(st+1)*0.22,6.0-st*0.1,6.1-st*0.1);
+
+  /* 게이블 벽 + 원형창 FR-1 */
+  [[X0,IX0],[IX1,X1]].forEach(function(pr){
+    var xa=pr[0],xb=pr[1];
+    tri(L.wall,MAT.brick,
+      quad([xa,EAVE,Z0],[xb,EAVE,Z0],[xb,RIDGE,3.6],[xa,RIDGE,3.6])
+      .concat(quad([xa,EAVE,Z1],[xa,RIDGE,3.6],[xb,RIDGE,3.6],[xb,EAVE,Z1]))
+      .concat([[[xa,EAVE,Z0],[xa,RIDGE,3.6],[xa,EAVE,Z1]],
+               [[xb,EAVE,Z0],[xb,EAVE,Z1],[xb,RIDGE,3.6]]]));
+    cyl(L.wall,MAT.glass,0.5,0.44,(xa+xb)/2,6.25,3.6,0,0,Math.PI/2);
+  });
+
+  /* 게이블 지붕 : 처마 5.200 → 능선 7.300, 돌출 500 */
+  var OV=0.5, slope=(RIDGE-EAVE)/(3.6+0.2), ey=EAVE-OV*slope, th=0.18;
+  var xa2=X0-OV, xb2=X1+OV;
+  [[Z0-OV,-1],[Z1+OV,1]].forEach(function(pr){
+    var ze=pr[0];
+    tri(L.roof,MAT.roof,
+      quad([xa2,ey,ze],[xb2,ey,ze],[xb2,RIDGE,3.6],[xa2,RIDGE,3.6])
+      .concat(quad([xa2,ey-th,ze],[xa2,RIDGE-th,3.6],[xb2,RIDGE-th,3.6],[xb2,ey-th,ze])));
+  });
+  for(var rx=X0;rx<=X1;rx+=1.5){
+    [[Z0,-1],[Z1,1]].forEach(function(pr){
+      var zz=pr[0], dz=Math.abs(3.6-zz), dy=(RIDGE-0.25)-EAVE, len=Math.sqrt(dz*dz+dy*dy);
+      var m=new THREE.Mesh(new THREE.BoxGeometry(0.06,0.13,len),MAT.timber);
+      m.position.set(rx,(EAVE+RIDGE-0.25)/2,(zz+3.6)/2);
+      m.rotation.x=Math.atan2(dy,dz)*pr[1];
+      L.roof.add(m);
+    });
+  }
+  box(L.roof,MAT.timber,X0,X1,RIDGE-0.35,RIDGE-0.20,3.53,3.67);
+
+  /* 축선 · 축 번호 */
+  var ap=[];
+  GRIDX.forEach(function(x){ ap.push(x,0.02,-2.6,x,0.02,10.2); });
+  [0,7.2].forEach(function(z){ ap.push(-3.6,0.02,z,33.6,0.02,z); });
+  var ag=new THREE.BufferGeometry();
+  ag.setAttribute('position',new THREE.Float32BufferAttribute(ap,3));
+  L.axis.add(new THREE.LineSegments(ag,new THREE.LineBasicMaterial({color:0xe0342b,transparent:true,opacity:0.55})));
+  ['①','②','③','④','⑤','⑥'].forEach(function(s,i){ lab(s,GRIDX[i],0.05,-3.2,'ax'); });
+  lab('A',-4.2,0.05,0,'ax'); lab('B',-4.2,0.05,7.2,'ax');
+  lab('30 000  (축①–⑥)',15,-0.55,-2.9);
+  lab('7 200',-4.8,-0.55,3.6);
+
+  /* 기계도면 본체 외곽 (폭 6600) */
+  edg(L.ghost,X0,X1,0,EAVE,Z0,6.6,0xe0342b);
+  box(L.ghost,MAT.ghost,X0,X1,0,EAVE,6.4,6.6);
+  lab('TX 본체 B축 6 600',31.4,2.4,6.6);
+  lab('AR 본체 B축 7 200',31.4,3.7,7.4);
+
+  /* 부속동 (TX) — 건축 도면 미반영 */
+  (function(){
+    var ax0=-6.6,ax1=-0.2,az0=0.3,az1=6.9,t=0.3,H=3.5;
+    box(L.annex,MAT.conc,ax0-0.1,ax1,-0.45,0,az0-0.1,az1+0.1);
+    [[ax0,ax0+t,az0,az1],[ax1-t,ax1,az0,az1],[ax0,ax1,az0,az0+t],[ax0,ax1,az1-t,az1]]
+      .forEach(function(q){ box(L.annex,MAT.brick,q[0],q[1],0,H,q[2],q[3]); });
+    box(L.annex,MAT.brick,ax0,ax1,0,H,3.7,4.0);
+    box(L.annex,MAT.brick,-3.6,-3.3,0,H,4.0,az1);
+    box(L.annex,MAT.roof,ax0-0.3,ax1,H,H+0.2,az0-0.3,az1+0.3);
+    for(var i=0;i<9;i++) box(L.annex,MAT.conc,-6.2,-5.2,i*0.2,(i+1)*0.2,1.0+i*0.18,1.18+i*0.18);
+    box(L.annex,MAT.door,ax0,ax0+0.08,0,2.1,1.4,2.4);
+    box(L.annex,MAT.door,-4.4,-3.3,0,2.1,az1-0.08,az1);
+    lab('홀 · 계단',-5.4,1.7,2.0,'rm');
+    lab('전기실',-2.0,1.7,1.9,'rm');
+    lab('계량실',-4.9,1.7,5.6,'rm');
+    lab('부속동 6 400 × 6 600  (건축 도면 미반영)',-3.4,H+1.1,3.6);
+  })();
+
+  /* 펌프 4대 + 기초 -2.600 + 배관 */
+  PUMPX.forEach(function(cx,i){
+    box(L.mech,MAT.conc2,cx-2.3,cx+2.3,-3.6,-2.60,1.4,3.4);
+    box(L.mech,MAT.steel,cx-2.4,cx+2.4,-2.60,-2.45,1.2,3.6);
+    cyl(L.mech,MAT.steel,0.62,1.05,cx-1.3,-1.85,2.4,0,0,Math.PI/2);
+    box(L.mech,MAT.motor,cx+0.3,cx+2.3,-2.45,-0.85,1.75,3.05);
+    cyl(L.mech,MAT.steel,0.11,0.85,cx-0.35,-1.85,2.4,0,0,Math.PI/2);
+    cyl(L.mech,MAT.suct,0.60,4.0,cx-1.3,-1.85,0.4,Math.PI/2,0,0);
+    cyl(L.mech,MAT.suct,0.60,3.2,cx-1.3,-0.4,-1.6,0,0,0);
+    cyl(L.mech,MAT.press,0.60,2.0,cx-1.3,-0.95,4.9,Math.PI/2,0,0);
+    lab('№'+(i+1),cx,-1.15,2.4);
+  });
+  cyl(L.mech,MAT.press,0.60,26,15,-0.95,5.9,0,0,Math.PI/2);
+  [7,22].forEach(function(x){ cyl(L.mech,MAT.press,0.60,7,x,-0.95,9.2,Math.PI/2,0,0); });
+  lab('압력수송관 → 상부 저수지',15,-0.2,10.8);
+  lab('흡입관 ← 취수',15,-0.2,-2.4);
+
+  /* 기계실 파일의 별동 (4500 × 3000) */
+  (function(){
+    var g=L.scada,x0=8,x1=12.5,z0=-14,z1=-11,ye=2.60,ya=3.50,t=0.38;
+    box(g,MAT.conc,x0-0.3,x1+0.3,-0.45,0,z0-0.3,z1+0.3);
+    [[x0,x0+t,z0,z1],[x1-t,x1,z0,z1],[x0,x1,z0,z0+t],[x0,x1,z1-t,z1]]
+      .forEach(function(q){ box(g,MAT.brick,q[0],q[1],0,ye,q[2],q[3]); });
+    box(g,MAT.brick,x0+1.5,x0+1.75,0,ye,z0,z1);
+    box(g,MAT.glass,x0+2.6,x0+3.6,0.6,2.1,z1-0.06,z1);
+    var zc=(z0+z1)/2,r1=x0+1.5,r2=x1-1.5;
+    tri(g,MAT.roof,
+      quad([x0-0.4,ye,z0-0.4],[x1+0.4,ye,z0-0.4],[r2,ya,zc],[r1,ya,zc])
+      .concat(quad([x1+0.4,ye,z1+0.4],[x0-0.4,ye,z1+0.4],[r1,ya,zc],[r2,ya,zc]))
+      .concat([[[x0-0.4,ye,z0-0.4],[r1,ya,zc],[x0-0.4,ye,z1+0.4]],
+               [[x1+0.4,ye,z0-0.4],[x1+0.4,ye,z1+0.4],[r2,ya,zc]]]));
+    lab('별동 4 500 × 3 000  (SCADA실 7.74 / 탈의실 2.60 m²)',10.25,ya+1.0,zc);
+  })();
+
+  /* ── 카메라 ── */
+  var target=new THREE.Vector3(13,1.2,3.6), sph={r:56,th:0.85,ph:1.06}, want=null;
+  function place(){
+    camera.position.set(
+      target.x+sph.r*Math.sin(sph.ph)*Math.sin(sph.th),
+      target.y+sph.r*Math.cos(sph.ph),
+      target.z+sph.r*Math.sin(sph.ph)*Math.cos(sph.th));
+    camera.lookAt(target);
+  }
+  var drag=null;
+  cv.addEventListener('pointerdown',function(e){
+    drag={x:e.clientX,y:e.clientY,pan:e.shiftKey||e.button===2};
+    if(cv.setPointerCapture) cv.setPointerCapture(e.pointerId);
+  });
+  cv.addEventListener('pointerup',function(){ drag=null; });
+  cv.addEventListener('pointerleave',function(){ drag=null; });
+  cv.addEventListener('pointermove',function(e){
+    if(!drag) return;
+    var dx=e.clientX-drag.x, dy=e.clientY-drag.y; drag.x=e.clientX; drag.y=e.clientY;
+    if(drag.pan){
+      var dir=new THREE.Vector3(); camera.getWorldDirection(dir);
+      var rt=new THREE.Vector3().crossVectors(new THREE.Vector3(0,1,0),dir).normalize();
+      target.addScaledVector(rt,-dx*sph.r*0.0011).addScaledVector(new THREE.Vector3(0,1,0),dy*sph.r*0.0011);
+    } else {
+      sph.th-=dx*0.006;
+      sph.ph=Math.max(0.06,Math.min(Math.PI/2+0.42,sph.ph-dy*0.006));
+    }
+    place();
+  });
+  cv.addEventListener('contextmenu',function(e){ e.preventDefault(); });
+  cv.addEventListener('wheel',function(e){
+    e.preventDefault();
+    sph.r=Math.max(6,Math.min(150,sph.r*(1+(e.deltaY>0?1:-1)*0.09))); place();
+  },{passive:false});
+  var pinch=0;
+  cv.addEventListener('touchmove',function(e){
+    if(e.touches.length===2){
+      var d=Math.sqrt(Math.pow(e.touches[0].clientX-e.touches[1].clientX,2)+
+                      Math.pow(e.touches[0].clientY-e.touches[1].clientY,2));
+      if(pinch){ sph.r=Math.max(6,Math.min(150,sph.r*pinch/d)); place(); }
+      pinch=d; e.preventDefault();
+    }
+  },{passive:false});
+  cv.addEventListener('touchend',function(){ pinch=0; });
+
+  /* ── 표고 하이라이트 평면 ── */
+  var hiP=null,hiL=null;
+  function plane(o){
+    if(hiP){ scene.remove(hiP); hiP=null; }
+    if(hiL){ hiL.el.parentNode.removeChild(hiL.el); labels.splice(labels.indexOf(hiL),1); hiL=null; }
+    if(!o || isNaN(o.y)) return;
+    var m=new THREE.Mesh(new THREE.PlaneGeometry(42,17),MAT.hi);
+    m.rotation.x=-Math.PI/2; m.position.set(13,o.y,3.6); scene.add(m); hiP=m;
+    hiL=lab(o.t,34.5,o.y,3.6,'ax');
+  }
+
+  /* ── 동기화 ── */
+  function sync(){
+    var S=STATE, ar=S.mode!=='tx', tx=S.mode!=='ar', ov=S.mode==='ov';
+    L.roof.visible  = ar && !!S.layers.roof;
+    L.wall.visible  = ar && !!S.layers.wall;
+    L.slab.visible  = ar && !!S.layers.slab;
+    L.ghost.visible = tx;
+    L.annex.visible = tx && !!S.layers.annex;
+    L.mech.visible  = !!S.layers.mech;
+    L.sub.visible   = !!S.layers.sub;
+    L.scada.visible = !!S.layers.scada;
+    FADE.forEach(function(m){ m.transparent=ov; m.opacity=ov?0.42:1; m.needsUpdate=true; });
+    labels.forEach(function(o){ o.el.dataset.hide = (o.grp==='rm' && !(tx&&S.layers.annex)) ? '1' : ''; });
+  }
+  function cut(){
+    var arr=[];
+    if(STATE.cutZ<7.9){ planeZ.constant=STATE.cutZ; arr.push(planeZ); }
+    if(STATE.cutX<30.9){ planeX.constant=STATE.cutX; arr.push(planeX); }
+    renderer.clippingPlanes=arr;
+  }
+  function fly(c){ want={x:c[0],y:c[1],z:c[2],r:c[3]}; }
+
+  VIEW={sync:sync,cut:cut,fly:fly,plane:plane};
+
+  /* ── 루프 ── */
+  function tick(){
+    var w=cv.clientWidth,h=cv.clientHeight;
+    if(w>0&&h>0&&(cv.width!==Math.round(w*renderer.getPixelRatio())||cv.height!==Math.round(h*renderer.getPixelRatio()))){
+      renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix();
+    }
+    if(want){
+      target.x+=(want.x-target.x)*0.09; target.y+=(want.y-target.y)*0.09;
+      target.z+=(want.z-target.z)*0.09; sph.r+=(want.r-sph.r)*0.09; place();
+      if(Math.abs(want.r-sph.r)<0.08 && Math.abs(want.x-target.x)<0.08) want=null;
+    }
+    for(var i=0;i<labels.length;i++){
+      var o=labels[i], p=o.v.clone().project(camera);
+      var vis = p.z<1 && !o.el.dataset.hide;
+      o.el.style.display = vis?'block':'none';
+      if(vis) o.el.style.transform='translate(-50%,-50%) translate('+
+        ((p.x*0.5+0.5)*w).toFixed(1)+'px,'+((-p.y*0.5+0.5)*h).toFixed(1)+'px)';
+    }
+    renderer.render(scene,camera);
+    requestAnimationFrame(tick);
+  }
+  place(); sync(); cut(); tick();
+
+}catch(err){
+  var v=document.getElementById('view');
+  var e=document.createElement('div'); e.id='err';
+  e.innerHTML='<b>3D 뷰포트를 초기화하지 못했습니다.</b><br>'+
+    (err&&err.message?err.message:String(err))+
+    '<br><br>좌측 표고 스택과 우측 부적합 목록은 정상 동작합니다. '+
+    'WebGL을 지원하는 브라우저(Chrome / Edge / Safari)에서 파일을 직접 열어 주십시오.';
+  if(v) v.appendChild(e);
+  if(window.console) console.error(err);
+}
+})();
+</script>
+
+<!-- 검토자료 패널 (docviewer) -->
+<script>window.LOKHUR_DOC={"site": "lokhur-0", "label": "로후르-0", "mount": "header", "push": true};</script>
+<script src="../assets/docviewer.js"></script>
+</body>
+</html>
