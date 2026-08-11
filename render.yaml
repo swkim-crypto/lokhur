@@ -1,0 +1,45 @@
+# Render 블루프린트 — 정적 사이트
+# 대시보드에서 New ▸ Blueprint 로 저장소를 연결하면 이 파일대로 배포됩니다.
+# 빌드 단계가 없습니다. site/ 폴더를 그대로 CDN 에 올립니다.
+
+services:
+  - type: web
+    name: lokhur-review
+    runtime: static
+    buildCommand: ""
+    staticPublishPath: ./site
+
+    # PR 미리보기 끔 — 검토 자료가 예상치 못한 URL 로 노출되지 않게 합니다.
+    previews:
+      generation: off
+
+    headers:
+      # 검색엔진 색인 차단. 정적 사이트에는 비밀번호를 걸 수 없으므로
+      # 최소한 검색 결과에는 뜨지 않게 합니다.
+      - path: /*
+        name: X-Robots-Tag
+        value: noindex, nofollow, noarchive
+
+      # 외부 페이지에 iframe 으로 박히는 것을 막습니다.
+      - path: /*
+        name: X-Frame-Options
+        value: sameorigin
+
+      - path: /*
+        name: Referrer-Policy
+        value: no-referrer
+
+      # three.js 는 내용이 바뀌지 않습니다. 길게 캐시합니다.
+      - path: /assets/three.min.js
+        name: Cache-Control
+        value: public, max-age=2592000, immutable
+
+      # 검토자료는 교체가 잦습니다. 매번 다시 받게 합니다.
+      - path: /docs/*
+        name: Cache-Control
+        value: no-cache
+
+      # 뷰어도 갱신이 잦으므로 재검증하게 둡니다.
+      - path: /viewer/*
+        name: Cache-Control
+        value: no-cache

@@ -1,0 +1,135 @@
+/* ═══════════════════════════════════════════════════════════════
+   docviewer.css — 3D 뷰어에 주입되는 검토자료 패널
+   모든 선택자에 .dk- 접두사. 기존 뷰어 CSS와 겹치지 않습니다.
+   ═══════════════════════════════════════════════════════════════ */
+
+.dk-btn{
+  display:inline-flex; align-items:center; gap:6px;
+  height:26px; padding:0 11px;
+  border:1px solid #4a5a6b; border-radius:13px;
+  background:#233040; color:#dce6f0;
+  font:600 11.5px/1 "Malgun Gothic","Apple SD Gothic Neo",system-ui,sans-serif;
+  letter-spacing:-.2px; cursor:pointer; white-space:nowrap;
+  transition:background .13s, border-color .13s;
+}
+.dk-btn:hover{ background:#2f4157; border-color:#6f8399; }
+.dk-btn:focus-visible{ outline:2px solid #7fb2e8; outline-offset:2px; }
+.dk-btn .dk-n{
+  display:inline-block; min-width:15px; height:15px; padding:0 4px;
+  border-radius:8px; background:#c2611c; color:#fff;
+  font:700 10px/15px ui-monospace,Menlo,Consolas,monospace; text-align:center;
+}
+.dk-btn.dk-float{
+  position:fixed; right:14px; bottom:14px; z-index:99990;
+  height:32px; border-radius:16px; box-shadow:0 3px 14px rgba(0,0,0,.45);
+}
+
+/* ── 오버레이 ───────────────────────────────────────────────── */
+.dk-ov{
+  position:fixed; inset:0; z-index:99991;
+  background:rgba(8,11,15,.72);
+  display:flex; align-items:center; justify-content:center;
+  padding:26px;
+  opacity:0; pointer-events:none; transition:opacity .16s;
+}
+.dk-ov.dk-on{ opacity:1; pointer-events:auto; }
+
+.dk-modal{
+  display:flex; flex-direction:column;
+  width:min(1180px,100%); height:min(880px,100%);
+  background:#f2f1ec; color:#1d2228;
+  border:1px solid #55606c; border-radius:6px;
+  box-shadow:0 18px 60px rgba(0,0,0,.55);
+  overflow:hidden;
+  transform:translateY(8px); transition:transform .16s;
+  font:13px/1.6 "Malgun Gothic","Apple SD Gothic Neo",system-ui,sans-serif;
+}
+.dk-ov.dk-on .dk-modal{ transform:none; }
+
+/* ── 모달 헤더 ─────────────────────────────────────────────── */
+.dk-hd{
+  flex:none; display:flex; align-items:center; gap:12px;
+  height:46px; padding:0 12px 0 16px;
+  background:#1c2530; color:#e6edf4; border-bottom:1px solid #55606c;
+}
+.dk-hd .dk-ttl{ font-size:13px; font-weight:700; letter-spacing:-.2px; }
+.dk-hd .dk-sub{ font-size:11px; color:#93a3b3; }
+.dk-tabs{ margin-left:auto; display:flex; gap:0; }
+.dk-tab{
+  height:28px; padding:0 13px;
+  border:1px solid #46525f; background:#232f3c; color:#b8c6d4;
+  font:600 11.5px/1 inherit; cursor:pointer;
+}
+.dk-tab+.dk-tab{ border-left:none; }
+.dk-tab:first-child{ border-radius:4px 0 0 4px; }
+.dk-tab:last-child{ border-radius:0 4px 4px 0; }
+.dk-tab.dk-on{ background:#3d6ea8; border-color:#5b8fcc; color:#fff; }
+.dk-tab:focus-visible{ outline:2px solid #7fb2e8; outline-offset:-2px; }
+.dk-x{
+  flex:none; width:28px; height:28px; margin-left:4px;
+  border:1px solid #46525f; border-radius:4px;
+  background:#232f3c; color:#c8d4e0;
+  font:400 16px/1 system-ui; cursor:pointer;
+}
+.dk-x:hover{ background:#3a2626; border-color:#7d4a4a; color:#ffd7d7; }
+
+/* ── 도구줄 ────────────────────────────────────────────────── */
+.dk-bar{
+  flex:none; display:flex; align-items:center; gap:8px;
+  padding:7px 14px; background:#e2e1da; border-bottom:1px solid #c3c2b8;
+  font-size:11.5px; color:#5a5e58;
+}
+.dk-bar .dk-note{ margin-right:auto; }
+.dk-lnk{
+  padding:3px 9px; border:1px solid #a9a89e; border-radius:3px;
+  background:#f7f6f2; color:#2c3138; text-decoration:none;
+  font-size:11.5px; font-weight:600; cursor:pointer;
+}
+.dk-lnk:hover{ background:#fff; border-color:#6d7c8c; }
+
+/* ── 본문 ──────────────────────────────────────────────────── */
+.dk-body{ flex:1; min-height:0; position:relative; background:#5c6067; }
+.dk-pane{ position:absolute; inset:0; display:none; }
+.dk-pane.dk-on{ display:block; }
+.dk-pane iframe{ width:100%; height:100%; border:none; background:#fff; }
+
+.dk-scroll{ position:absolute; inset:0; overflow:auto; background:#5c6067; padding:22px; }
+.dk-doc{
+  max-width:900px; margin:0 auto; padding:40px 46px;
+  background:#fff; box-shadow:0 2px 14px rgba(0,0,0,.3);
+  font-size:13.5px; line-height:1.75; color:#1d2228;
+}
+.dk-doc p{ margin:0 0 .7em; }
+.dk-doc strong{ font-weight:700; }
+.dk-doc table{
+  width:100%; border-collapse:collapse; margin:1em 0 1.4em;
+  font-size:12px; line-height:1.5;
+}
+.dk-doc th,.dk-doc td{
+  border:1px solid #9aa0a6; padding:6px 8px; vertical-align:top; text-align:left;
+}
+.dk-doc th{ background:#e8ebee; font-weight:700; }
+.dk-doc tbody tr:nth-child(even) td{ background:#fafbfc; }
+.dk-doc td p:last-child,.dk-doc th p:last-child{ margin-bottom:0; }
+
+.dk-msg{
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  padding:30px; text-align:center; color:#e8ecf0; font-size:13px; line-height:1.8;
+}
+.dk-msg code{
+  display:inline-block; margin-top:6px; padding:3px 8px; border-radius:3px;
+  background:#1c2530; color:#8fd0a8; font:12px ui-monospace,Menlo,Consolas,monospace;
+}
+
+@media (max-width:720px){
+  .dk-ov{ padding:0; }
+  .dk-modal{ height:100%; border-radius:0; border:none; }
+  .dk-hd{ flex-wrap:wrap; height:auto; padding:8px 10px; }
+  .dk-tabs{ width:100%; margin:6px 0 0; }
+  .dk-tab{ flex:1; }
+  .dk-doc{ padding:22px 18px; }
+  .dk-scroll{ padding:0; }
+}
+@media (prefers-reduced-motion:reduce){
+  .dk-ov,.dk-modal,.dk-btn{ transition:none; }
+}

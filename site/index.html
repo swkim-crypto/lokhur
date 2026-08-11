@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>로후르 양수장 설계도면 검토 · 루다키 지구</title>
+<meta name="description" content="로후르-0/-1/-2/-3 관개구역 재건사업 실시설계(РП) 도면 정합성 검토 — 3D 검토 뷰어 및 검토자료">
+<style>
+/* ═══ 토큰 ═══════════════════════════════════════════════════
+   청사진(오잘리드) 인화지 계열. 숫자는 전부 등폭으로 조판합니다.
+   웹폰트를 쓰지 않습니다 — 폐쇄망에서도 그대로 뜹니다. */
+:root{
+  --film:#dde1db; --film2:#edefea; --card:#f5f6f2;
+  --ink:#1c2830; --ink2:#56646e; --ink3:#8b978f;
+  --rule:#b3bab4; --rule2:#cdd2cb;
+  --blue:#245f8f; --carmine:#9c2f45; --amber:#a55c14; --moss:#3d6b4a;
+  --mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,"D2Coding",monospace;
+  --sans:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--film); color:var(--ink);
+  font:14px/1.7 var(--sans); letter-spacing:-.1px;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1120px; margin:0 auto; padding:0 26px}
+a{color:inherit}
+.num{font-family:var(--mono); font-variant-numeric:tabular-nums; letter-spacing:0}
+
+/* ═══ 마스트헤드 ══════════════════════════════════════════ */
+.mast{border-bottom:1.5px solid var(--ink); background:var(--film2)}
+.mast .wrap{display:flex; align-items:baseline; gap:16px; flex-wrap:wrap; padding-top:20px; padding-bottom:14px}
+.mast h1{margin:0; font-size:19px; font-weight:800; letter-spacing:-.5px}
+.mast .ru{font-size:12px; color:var(--ink2); font-style:italic}
+.mast .tag{
+  margin-left:auto; display:flex; gap:0; border:1px solid var(--rule); background:var(--card);
+}
+.mast .tag b{
+  display:block; padding:5px 11px; font-size:11px; font-weight:600; color:var(--ink2);
+  border-right:1px solid var(--rule2);
+}
+.mast .tag b:last-child{border-right:none}
+.mast .tag b i{font-style:normal; color:var(--carmine); font-weight:800}
+
+.eyebrow{
+  font-size:10.5px; font-weight:700; letter-spacing:1.6px; color:var(--ink3);
+  text-transform:uppercase; margin:0 0 10px;
+}
+
+/* ═══ 표고 사다리 (히어로 겸 내비게이션) ═════════════════════
+   4개소를 실제 절대표고의 선형 축척에 올립니다.
+   0번과 1번이 붙어 보이는 것이 항목 24의 부적합 그 자체입니다. */
+.hero{padding:34px 0 10px}
+.hero .lead{max-width:620px; margin:0 0 26px; font-size:14.5px; color:var(--ink2)}
+.hero .lead b{color:var(--ink); font-weight:700}
+
+#ladder{position:relative; margin:0 0 8px}
+#ladder .axis{
+  position:absolute; left:74px; top:0; bottom:0; width:1px; background:var(--rule);
+}
+#ladder .grid{
+  position:absolute; left:74px; right:0; height:1px; background:var(--rule2);
+}
+#ladder .gl{
+  position:absolute; left:0; width:66px; text-align:right;
+  font-family:var(--mono); font-size:10px; color:var(--ink3);
+  transform:translateY(-50%);
+}
+.stn{
+  position:absolute; left:74px; right:0; height:0;
+  transform:translateY(-50%);
+}
+.stn .bar{
+  position:absolute; left:0; top:-1px; height:2px; background:var(--ink);
+  width:0; transition:width .5s cubic-bezier(.2,.7,.3,1);
+}
+.stn .ev{
+  position:absolute; left:-74px; width:66px; top:-9px; text-align:right;
+  font-family:var(--mono); font-size:12.5px; font-weight:600; color:var(--ink);
+}
+.stn a.node{
+  position:absolute; top:-19px; display:flex; align-items:center; gap:9px;
+  padding:5px 13px 5px 11px; text-decoration:none;
+  background:var(--card); border:1.5px solid var(--ink); border-radius:2px;
+  opacity:0; transform:translateX(-6px); transition:opacity .38s, transform .38s, background .12s;
+  white-space:nowrap;
+}
+.stn a.node:hover{background:#fff}
+.stn a.node:focus-visible{outline:2px solid var(--blue); outline-offset:2px}
+.stn a.node .nm{font-size:13.5px; font-weight:800; letter-spacing:-.3px}
+.stn a.node .sh{font-family:var(--mono); font-size:10.5px; color:var(--ink2)}
+.stn a.node .nc{
+  font-family:var(--mono); font-size:10.5px; font-weight:700; color:#fff;
+  background:var(--carmine); padding:1px 6px; border-radius:2px;
+}
+.stn a.node .go{font-size:13px; color:var(--ink3)}
+.stn a.node:hover .go{color:var(--blue)}
+.stn.warn .ev{color:var(--amber)}
+.stn.warn .bar{background:var(--amber)}
+.stn.warn a.node{border-color:var(--amber); border-style:dashed}
+
+/* 단간 낙차 주기 */
+.rise{
+  position:absolute; left:calc(74px + 330px);
+  border-left:1.5px dotted var(--rule); padding-left:11px;
+  font-size:11px; color:var(--ink2); display:flex; align-items:center;
+  opacity:0; transition:opacity .4s;
+}
+.rise .d{font-family:var(--mono); font-weight:700; color:var(--ink)}
+.rise .flag{color:var(--carmine); font-weight:700}
+#ladder.in .stn .bar{width:100%}
+#ladder.in .stn a.node{opacity:1; transform:none}
+#ladder.in .rise{opacity:1}
+
+.hero .foot{
+  margin:14px 0 0; padding-top:12px; border-top:1px solid var(--rule2);
+  font-size:11.5px; color:var(--ink3); max-width:760px;
+}
+
+/* ═══ 개소 카드 ══════════════════════════════════════════ */
+.sec{padding:36px 0 0}
+.sec h2{
+  margin:0 0 4px; font-size:16px; font-weight:800; letter-spacing:-.4px;
+  padding-bottom:9px; border-bottom:1.5px solid var(--ink);
+}
+.sec .cap{margin:9px 0 18px; font-size:12.5px; color:var(--ink2); max-width:700px}
+
+.cards{display:grid; grid-template-columns:repeat(4,1fr); gap:14px}
+.card{
+  display:flex; flex-direction:column;
+  background:var(--card); border:1px solid var(--rule); text-decoration:none;
+  transition:border-color .13s, transform .13s;
+}
+.card:hover{border-color:var(--ink); transform:translateY(-2px)}
+.card:focus-visible{outline:2px solid var(--blue); outline-offset:2px}
+.card .top{padding:12px 13px 10px; border-bottom:1px solid var(--rule2)}
+.card .top .id{font-size:15px; font-weight:800; letter-spacing:-.4px}
+.card .top .kind{font-size:11px; color:var(--ink2); margin-top:1px}
+.card dl{margin:0; padding:10px 13px 12px; flex:1}
+.card dl div{display:flex; justify-content:space-between; gap:8px; padding:2.5px 0; font-size:11.5px}
+.card dt{color:var(--ink2); flex:none}
+.card dd{margin:0; font-family:var(--mono); font-size:11px; text-align:right; font-variant-numeric:tabular-nums}
+.card dd.bad{color:var(--carmine); font-weight:700}
+.card .act{
+  padding:9px 13px; border-top:1px solid var(--rule2); background:var(--film2);
+  font-size:11.5px; font-weight:700; color:var(--blue);
+  display:flex; justify-content:space-between; align-items:center;
+}
+
+/* ═══ 표 ═════════════════════════════════════════════════ */
+.tbl{width:100%; border-collapse:collapse; font-size:12.5px; background:var(--card)}
+.tbl th,.tbl td{border:1px solid var(--rule2); padding:7px 10px; text-align:left; vertical-align:top}
+.tbl thead th{background:var(--film2); font-weight:700; font-size:11.5px; color:var(--ink2)}
+.tbl td.c{text-align:center; font-family:var(--mono); font-size:11.5px}
+.tbl td.dot{text-align:center; color:var(--carmine); font-weight:800}
+.tbl tbody tr:hover td{background:#fff}
+
+/* ═══ 요청 목록 ══════════════════════════════════════════ */
+.asks{list-style:none; margin:0; padding:0; counter-reset:a}
+.asks li{
+  counter-increment:a; position:relative; padding:9px 0 9px 40px;
+  border-bottom:1px solid var(--rule2); font-size:13px;
+}
+.asks li::before{
+  content:counter(a,decimal-leading-zero); position:absolute; left:0; top:9px;
+  font-family:var(--mono); font-size:11px; font-weight:700; color:var(--carmine);
+}
+.asks li b{font-weight:700}
+
+footer{margin-top:44px; padding:20px 0 40px; border-top:1.5px solid var(--ink); background:var(--film2)}
+footer .wrap{display:flex; gap:18px; flex-wrap:wrap; font-size:11.5px; color:var(--ink2)}
+footer .wrap span:last-child{margin-left:auto}
+
+/* ═══ 반응형 ═════════════════════════════════════════════ */
+@media (max-width:900px){
+  .cards{grid-template-columns:repeat(2,1fr)}
+  .rise{display:none}
+}
+@media (max-width:640px){
+  .wrap{padding:0 16px}
+  .mast .tag{margin-left:0; width:100%}
+  .cards{grid-template-columns:1fr}
+  #ladder .axis,#ladder .grid,#ladder .gl{display:none}
+  .stn{position:static; transform:none; height:auto; margin-bottom:9px}
+  .stn .bar{display:none}
+  .stn .ev{position:static; width:auto; text-align:left; margin-bottom:3px; display:block}
+  .stn a.node{position:static; opacity:1; transform:none; display:flex}
+  #ladder{height:auto !important}
+}
+@media (prefers-reduced-motion:reduce){
+  .stn .bar,.stn a.node,.rise,.card{transition:none}
+  .stn .bar{width:100%}
+  .stn a.node,.rise{opacity:1; transform:none}
+}
+</style>
+</head>
+<body>
+
+<div class="mast">
+  <div class="wrap">
+    <h1>로후르 양수장 설계도면 검토</h1>
+    <span class="ru">Баркарорсозии пойгоххои обкашии Лохур-0…3 дар нохияи Рудаки</span>
+    <div class="tag">
+      <b>실시설계 РП</b>
+      <b>두샨베-2026</b>
+      <b>부적합 <i>90</i>건</b>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <section class="hero">
+    <p class="eyebrow">개소 선택 · 표고 단면</p>
+    <p class="lead">
+      네 개소는 하나의 계열로 물을 밀어 올립니다. 아래 축은 각 개소 ±0.000의 절대표고를
+      <b>실제 축척 그대로</b> 세운 것입니다. 단당 양정이 <span class="num">50 m</span>인데
+      0번과 1번의 표고차는 <span class="num">2.81 m</span>에 그칩니다 —
+      직렬 다단이라면 성립하지 않는 배치입니다. 개소를 누르면 3D 검토 화면이 열립니다.
+    </p>
+    <div id="ladder" aria-label="개소별 표고 단면"></div>
+    <p class="foot">
+      표고는 각 개소 도면에 기입된 ±0.000의 절대표고입니다. 로후르-3만 도면 기재값이
+      <span class="num">733.15</span>(로후르-1과 동일)인데 부지 실측 지반고는
+      <span class="num">805.94~823.93</span> m로, 건물 주변 지반 <span class="num">12</span>점 평균
+      <span class="num">807.63</span> m를 실제값으로 추정했습니다. 차이 <span class="num">74.48</span> m.
+    </p>
+  </section>
+
+  <section class="sec">
+    <h2>개소별 검토 결과</h2>
+    <p class="cap">각 카드는 3D 검토 화면으로 연결됩니다. 화면 안의 <b>검토자료</b> 버튼에서 설계사 간략설명서 원문(PDF)과 한국어 번역본을 함께 볼 수 있습니다.</p>
+    <div class="cards" id="cards"></div>
+  </section>
+
+  <section class="sec">
+    <h2>네 개소 공통 패턴</h2>
+    <p class="cap">개별 오류가 아니라 성과품 작성·검수 절차의 문제로 판단되는 항목입니다. 한 개소에서 고쳐도 나머지에서 되풀이됩니다.</p>
+    <table class="tbl">
+      <thead><tr>
+        <th style="width:44%">패턴</th><th class="c">0</th><th class="c">1</th><th class="c">2</th><th class="c">3</th><th>비고</th>
+      </tr></thead>
+      <tbody id="pat"></tbody>
+    </table>
+  </section>
+
+  <section class="sec">
+    <h2>설계사 우선 요청 사항</h2>
+    <p class="cap">아래 항목은 회신 전까지 후속 검토를 진행할 수 없습니다.</p>
+    <ol class="asks" id="asks"></ol>
+  </section>
+
+</div>
+
+<footer><div class="wrap">
+  <span>발주 · 토지개량 및 관개청 / 타지킬리보드호즈</span>
+  <span>설계 · ГУП «Точикгипроводхоз»</span>
+  <span>독립 검토 자료 — 대외 공개용 아님</span>
+</div></footer>
+
+<script>
+/* ═══ 데이터 ══════════════════════════════════════════════
+   개소가 늘거나 수치가 바뀌면 이 배열만 고치면 됩니다. */
+var SITES = [
+  { id:'lokhur-0', nm:'로후르-0', ev:730.34, evOk:true,
+    kind:'양수장 신축 · 부대시설', sheets:37, albums:'3개 파일', nc:12,
+    area:'2 311 ha', cost:'16 402 155.50', dims:'6.5 × 30 × 8.0 m',
+    pump:'KQSN800-M17S ×4', motor:'YKK560-6 · 1 000 kW' },
+  { id:'lokhur-1', nm:'로후르-1', ev:733.15, evOk:true,
+    kind:'양수장 복구 · 변전소', sheets:57, albums:'5개 앨범', nc:24,
+    area:'2 371 ha', cost:'15 962 725.50', dims:'7.8 × 45 × 3.5 m',
+    pump:'KQSN800-M17S-625 ×3 + KQSN700-M9J-869 ×1', motor:'YKK560-6 / Y500-8 · 560 kW' },
+  { id:'lokhur-2', nm:'로후르-2', ev:771.52, evOk:true,
+    kind:'양수장 복구 · 변전소', sheets:57, albums:'5개 앨범', nc:26,
+    area:'2 234 ha', cost:'16 470 178.36', dims:'7.8 × 45 × 3.5 m',
+    pump:'KQSN800-M17S-625 ×4', motor:'YKK560-6 · 1 000 kW' },
+  { id:'lokhur-3', nm:'로후르-3', ev:807.63, evOk:false,
+    kind:'양수장 복구 · 변전소', sheets:54, albums:'5개 앨범', nc:28,
+    area:'1 091 ha', cost:'13 282 296.61', dims:'6.0 × 47 × 3.5 m',
+    pump:'KQSN700-M9J-869 ×3 + KQSN350-M9-415 ×1', motor:'Y500-8 · 640 kW / Y355-4 · 250 kW' }
+];
+
+var PATTERNS = [
+  ['본체 폭이 도면마다 다름', 1,1,1,1, '3종 / 5종 / 다수'],
+  ['종방향 구간 치수합 ≠ 총치수', 1,1,1,1, '36 500 vs 30 000 등'],
+  ['±0.000 절대표고 다수 혼재', 1,1,1,1, '8종 / 5종 / 6종 / 16종'],
+  ['582.22 계열 표고 잔존', 1,1,1,1, '-1.25 · -1.50 · -2.60'],
+  ['1457.05 (당직실 = 기계실 단면)', 1,1,1,1, '동일 도면 유입'],
+  ['펌프 기초보다 프레임이 김', 1,1,1,1, '4 565 < 4 800'],
+  ['앵커볼트 규격 불일치', 1,1,1,1, 'M30 vs M36~M48'],
+  ['양중설비 정격 부족 또는 미계상', 1,1,1,1, '10 t < 11.7 t'],
+  ['크레인 거더 · 정격 · 훅높이 미기재', 1,1,1,1, ''],
+  ['펌프 모델 · 임펠러 직경 불일치', 1,1,1,1, '615.8 / 625 / 869'],
+  ['설비 사양서 615.8 · 5 184 · 50 미갱신', 1,1,1,1, '개소별 미반영'],
+  ['철거 중량 소수점까지 동일', 1,1,1,1, '26298.0 / 19500.0 …'],
+  ['타 사업 도면 혼입', 1,1,1,1, '수피-오리프 양수장 등'],
+  ['NPSH 검토서 없음 · 최저 운전수위 미기재', 1,1,1,1, '전 개소']
+];
+
+var ASKS = [
+  ['원본 CAD 파일(DWG/DXF) 또는 벡터 PDF', '현 자료는 전부 래스터라 기재 치수 밖의 형상 검증이 불가능합니다.'],
+  ['단일 기준점(Datum) 고시 및 전 도면 표고 일괄 환산', '로후르-3은 도면 기재 ±0.000과 부지 실측 지반고가 74 m 어긋납니다.'],
+  ['각 개소 최저 운전수위 및 NPSH 검토서', '표고 733~808 m의 대기압 저하를 반영한 값이 필요합니다.'],
+  ['기존 크레인 정격 하중 · 양정 · 훅 유효 높이', '인양 대상이 개당 11.7 t인데 정격이 어느 도면에도 없습니다.'],
+  ['전기부문(ЭО) 앨범 및 가압조절저수조(НРР.ЖБ) 도면', '표1에 등재되어 있으나 미제출입니다.'],
+  ['본체 건축 평면도 · 입면도', '로후르-1·3의 건축(АС) 앨범에 기계도면만 수록되어 있습니다.'],
+  ['4개소 상호 검수(cross-check) 절차와 담당자', '위 14개 항목이 네 개소에 그대로 반복됩니다.']
+];
+
+/* ═══ 표고 사다리 조립 ════════════════════════════════════ */
+(function(){
+  var host = document.getElementById('ladder');
+  var H = 340, PADT = 26, PADB = 26;
+  var evs = SITES.map(function(s){ return s.ev; });
+  var lo = Math.min.apply(null, evs), hi = Math.max.apply(null, evs);
+  var span = hi - lo, pad = span * 0.06;
+  lo -= pad; hi += pad;
+  host.style.height = (H + PADT + PADB) + 'px';
+  host.style.position = 'relative';
+
+  function y(v){ return PADT + H - (v - lo) / (hi - lo) * H; }
+
+  var ax = document.createElement('div'); ax.className = 'axis'; host.appendChild(ax);
+
+  // 눈금 — 10 m 간격
+  var t0 = Math.ceil(lo / 10) * 10;
+  for (var t = t0; t <= hi; t += 10) {
+    var g = document.createElement('div'); g.className = 'grid'; g.style.top = y(t) + 'px';
+    host.appendChild(g);
+    var gl = document.createElement('div'); gl.className = 'gl num';
+    gl.style.top = y(t) + 'px'; gl.textContent = t.toFixed(0);
+    host.appendChild(gl);
+  }
+
+  // 개소
+  SITES.forEach(function(s){
+    var d = document.createElement('div');
+    d.className = 'stn' + (s.evOk ? '' : ' warn');
+    d.style.top = y(s.ev) + 'px';
+    d.innerHTML =
+      '<span class="ev num">' + s.ev.toFixed(2) + (s.evOk ? '' : ' ?') + '</span>' +
+      '<span class="bar"></span>' +
+      '<a class="node" href="viewer/' + s.id + '.html">' +
+        '<span class="nm">' + s.nm + '</span>' +
+        '<span class="sh num">' + s.sheets + '장</span>' +
+        '<span class="nc">' + s.nc + '</span>' +
+        '<span class="go">&rarr;</span>' +
+      '</a>';
+    host.appendChild(d);
+  });
+
+  // 단간 낙차
+  for (var i = 0; i < SITES.length - 1; i++) {
+    var a = SITES[i], b = SITES[i + 1];
+    var dz = b.ev - a.ev;
+    var r = document.createElement('div'); r.className = 'rise';
+    var top = y(b.ev), bot = y(a.ev);
+    r.style.top = top + 'px'; r.style.height = (bot - top) + 'px';
+    r.innerHTML = '<span>Δ <span class="d">' + dz.toFixed(2) + ' m</span>'
+      + ' &nbsp;<span class="flag">양정 50 m &ne;</span></span>';
+    host.appendChild(r);
+  }
+
+  requestAnimationFrame(function(){ setTimeout(function(){ host.classList.add('in'); }, 60); });
+})();
+
+/* ═══ 카드 ════════════════════════════════════════════════ */
+(function(){
+  var h = '';
+  SITES.forEach(function(s){
+    h += '<a class="card" href="viewer/' + s.id + '.html">'
+      + '<div class="top"><div class="id">' + s.nm + '</div><div class="kind">' + s.kind + '</div></div>'
+      + '<dl>'
+      + row('부적합', s.nc + '건', true)
+      + row('도면', s.sheets + '장 · ' + s.albums)
+      + row('±0.000', s.ev.toFixed(2) + (s.evOk ? '' : ' ?'))
+      + row('관개면적', s.area)
+      + row('건물 규격', s.dims)
+      + row('공사비', s.cost)
+      + '</dl>'
+      + '<div class="act"><span>3D 검토 열기</span><span>&rarr;</span></div>'
+      + '</a>';
+  });
+  document.getElementById('cards').innerHTML = h;
+  function row(k, v, bad){
+    return '<div><dt>' + k + '</dt><dd' + (bad ? ' class="bad"' : '') + '>' + v + '</dd></div>';
+  }
+})();
+
+/* ═══ 공통 패턴 표 ════════════════════════════════════════ */
+(function(){
+  var h = '';
+  PATTERNS.forEach(function(p){
+    h += '<tr><td>' + p[0] + '</td>'
+      + '<td class="dot">' + (p[1] ? '●' : '·') + '</td>'
+      + '<td class="dot">' + (p[2] ? '●' : '·') + '</td>'
+      + '<td class="dot">' + (p[3] ? '●' : '·') + '</td>'
+      + '<td class="dot">' + (p[4] ? '●' : '·') + '</td>'
+      + '<td style="color:var(--ink2);font-size:11.5px">' + p[5] + '</td></tr>';
+  });
+  document.getElementById('pat').innerHTML = h;
+})();
+
+/* ═══ 요청 목록 ═══════════════════════════════════════════ */
+(function(){
+  var h = '';
+  ASKS.forEach(function(a){
+    h += '<li><b>' + a[0] + '</b> — <span style="color:var(--ink2)">' + a[1] + '</span></li>';
+  });
+  document.getElementById('asks').innerHTML = h;
+})();
+</script>
+</body>
+</html>
