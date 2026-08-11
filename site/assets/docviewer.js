@@ -50,7 +50,7 @@
     b.setAttribute('role', 'button');
     b.setAttribute('tabindex', '0');
     b.setAttribute('aria-haspopup', 'dialog');
-    b.appendChild(document.createTextNode('검토자료'));
+    b.appendChild(document.createTextNode(CFG.btn || '검토자료'));
     if (docs.length) b.appendChild(el('span', 'dk-n', String(docs.length)));
 
     b.addEventListener('click', function () { open(0); });

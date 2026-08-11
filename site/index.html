@@ -164,7 +164,9 @@ footer .wrap span:last-child{margin-left:auto}
   .lvl .bar{width:100%}
   .node,.rise{opacity:1; transform:translateY(-50%)}
 }
+.mast .wrap .dk-btn{align-self:center; height:28px}
 </style>
+<link rel="stylesheet" href="assets/docviewer.css">
 </head>
 <body>
 
@@ -432,5 +434,8 @@ function declutter(ys, min, lo, hi) {
   document.getElementById('asks').innerHTML = h;
 })();
 </script>
+<!-- 통합 검토 자료 패널 -->
+<script>window.LOKHUR_DOC={base:"docs/overall/",label:"통합 검토 자료",btn:"검토 (전체)",mount:".mast .wrap",push:false};</script>
+<script src="assets/docviewer.js"></script>
 </body>
 </html>
