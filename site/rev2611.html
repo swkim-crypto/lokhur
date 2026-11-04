@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>로후르 양수장 보완설계 검토 · 2026-11</title>
+<meta name="description" content="로후르-0/-1/-2/-3 보완 설계도면(2026-11) 정합성 검토 — 19개 파일 230장">
+<style>
+/* ═══ 토큰 — 기존 포털과 같은 체계, 강조색만 REV 주황 ═══ */
+:root{
+  --film:#dde1db; --film2:#edefea; --card:#f5f6f2;
+  --ink:#1c2830; --ink2:#56646e; --ink3:#8b978f;
+  --rule:#b3bab4; --rule2:#cdd2cb;
+  --blue:#245f8f; --carmine:#9c2f45; --amber:#a55c14; --moss:#3d6b4a;
+  --rev:#8a4a18; --revbg:#faf3ea;
+  --mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,"D2Coding",monospace;
+  --sans:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--film);color:var(--ink);
+  font:14px/1.7 var(--sans);letter-spacing:-.1px;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1120px;margin:0 auto;padding:0 26px}
+a{color:inherit}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums;letter-spacing:0}
+
+/* ═══ 마스트헤드 ═══ */
+.mast{border-bottom:1.5px solid var(--rev);background:var(--revbg)}
+.mast .wrap{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;padding-top:20px;padding-bottom:14px}
+.mast h1{margin:0;font-size:19px;font-weight:800;letter-spacing:-.5px}
+.mast .rev{padding:3px 9px;border-radius:2px;background:var(--rev);color:#ffe4c9;
+  font:700 11px/16px var(--mono);letter-spacing:.4px;white-space:nowrap}
+.mast .ru{font-size:12px;color:var(--ink2);font-style:italic}
+.mast .nav{margin-left:auto;display:flex;gap:7px;align-items:center}
+.mast .nav a{display:inline-flex;align-items:center;height:28px;padding:0 11px;
+  border:1px solid var(--rule);border-radius:3px;background:#fff;color:var(--ink2);
+  font-size:11.5px;font-weight:600;text-decoration:none;white-space:nowrap}
+.mast .nav a:hover{border-color:var(--ink2);color:var(--ink)}
+
+/* ═══ 절 ═══ */
+.sec{padding:36px 0 0}
+.sec>h2{margin:0;font-size:20px;font-weight:800;letter-spacing:-.6px;
+  padding-bottom:10px;border-bottom:2px solid var(--ink)}
+.sec>h2 em{font-style:normal;font-weight:600;font-size:13px;color:var(--ink2);
+  margin-left:10px;letter-spacing:-.2px}
+.sec .cap{margin:11px 0 20px;font-size:13px;color:var(--ink2);max-width:780px}
+.sec .cap b{color:var(--ink);font-weight:700}
+
+/* ═══ 히어로 차트 ═══ */
+#chart{position:relative;margin:4px 0 0;background:var(--card);
+  border:1px solid var(--rule);border-radius:3px;padding:16px 16px 10px}
+#chart svg{display:block;width:100%;height:auto;overflow:visible}
+.lgd{display:flex;gap:16px;flex-wrap:wrap;margin:12px 0 0;padding-top:11px;
+  border-top:1px solid var(--rule2);font-size:11.5px;color:var(--ink2)}
+.lgd span{display:inline-flex;align-items:center;gap:6px}
+.lgd i{display:inline-block;width:16px;height:0;border-top-width:2px;border-top-style:solid}
+.lgd i.bar{height:11px;width:9px;border:0;border-radius:1px}
+
+.callout{margin:20px 0 0;padding:14px 16px;background:var(--card);
+  border:1px solid var(--rule);border-left:4px solid var(--rev);font-size:13px;line-height:1.75}
+.callout b{font-weight:800}
+.note{margin:12px 0 0;font-size:11.5px;color:var(--ink3);max-width:840px}
+
+/* ═══ 카드 ═══ */
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.card{display:flex;flex-direction:column;background:var(--card);
+  border:1px solid var(--rule);text-decoration:none;transition:border-color .13s,transform .13s}
+.card:hover{border-color:var(--rev);transform:translateY(-2px)}
+.card:focus-visible{outline:2px solid var(--rev);outline-offset:2px}
+.card .top{padding:12px 13px 10px;border-bottom:1px solid var(--rule2);background:var(--revbg)}
+.card .top .id{font-size:15px;font-weight:800;letter-spacing:-.4px}
+.card .top .kind{font-size:11px;color:var(--ink2);margin-top:1px}
+.card dl{margin:0;padding:10px 13px 12px;flex:1}
+.card dl div{display:flex;justify-content:space-between;gap:8px;padding:2.5px 0;font-size:11.5px}
+.card dt{color:var(--ink2);flex:none}
+.card dd{margin:0;font-family:var(--mono);font-size:11px;text-align:right;font-variant-numeric:tabular-nums}
+.card dd.bad{color:var(--carmine);font-weight:700}
+.card dd.ok{color:var(--moss);font-weight:700}
+.card .act{padding:9px 13px;border-top:1px solid var(--rule2);background:var(--film2);
+  font-size:11.5px;font-weight:700;color:var(--rev);display:flex;justify-content:space-between}
+
+.alt{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0 0;font-size:11.5px}
+.alt a{display:inline-flex;align-items:center;gap:5px;padding:6px 11px;border:1px solid var(--rule);
+  border-radius:3px;background:#fff;color:var(--ink2);text-decoration:none;font-weight:600}
+.alt a:hover{border-color:var(--ink2);color:var(--ink)}
+
+/* ═══ 표 ═══ */
+.tbl{width:100%;border-collapse:collapse;font-size:12.5px;background:var(--card)}
+.tbl th,.tbl td{border:1px solid var(--rule2);padding:7px 10px;text-align:left;vertical-align:top}
+.tbl thead th{background:var(--film2);font-weight:700;font-size:11.5px;color:var(--ink2)}
+.tbl td.c{text-align:center;font-family:var(--mono);font-size:11.5px}
+.tbl td.dot{text-align:center;font-weight:800}
+.tbl td.dot.y{color:var(--carmine)}
+.tbl td.dot.n{color:var(--ink3)}
+.tbl tbody tr:hover td{background:#fff}
+.tbl .tag{display:inline-block;padding:1px 6px;border-radius:2px;font:700 10px/16px var(--mono)}
+.tbl .tag.nw{background:#f3dfd0;color:var(--rev)}
+.tbl .tag.un{background:#f0dadf;color:var(--carmine)}
+.tbl .tag.ok{background:#dae8de;color:var(--moss)}
+
+/* ═══ 요청 ═══ */
+.asks{list-style:none;margin:0;padding:0;counter-reset:a}
+.asks li{counter-increment:a;position:relative;padding:9px 0 9px 40px;
+  border-bottom:1px solid var(--rule2);font-size:13px}
+.asks li::before{content:counter(a,decimal-leading-zero);position:absolute;left:0;top:9px;
+  font-family:var(--mono);font-size:11px;font-weight:700;color:var(--rev)}
+
+footer{margin-top:46px;padding:20px 0 40px;border-top:1.5px solid var(--rev);background:var(--revbg)}
+footer .wrap{display:flex;gap:18px;flex-wrap:wrap;font-size:11.5px;color:var(--ink2)}
+footer .wrap span:last-child{margin-left:auto}
+
+@media (max-width:960px){ .cards{grid-template-columns:repeat(2,1fr)} }
+@media (max-width:700px){
+  .wrap{padding:0 16px}
+  .mast .nav{margin-left:0;width:100%}
+  .cards{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){ .card{transition:none} }
+</style>
+</head>
+<body>
+
+<div class="mast">
+  <div class="wrap">
+    <h1>로후르 양수장 보완설계 검토</h1>
+    <span class="rev">REV 2026-11</span>
+    <span class="ru">19개 파일 230장 · 4개소 전수</span>
+    <div class="nav">
+      <a href="index.html">← 기존 검토 (2026-08)</a>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <section class="sec">
+    <h2>부지는 올라가는데 기준면은 평평합니다 <em>보완본 기재 표고</em></h2>
+    <p class="cap">
+      세로축은 절대표고입니다. <b>세로 막대</b>는 각 개소 부지 평면도에 기입된 실측 지반고의 범위이고,
+      <b>가로선</b>은 도면이 ±0.000으로 삼은 기준면입니다.
+      부지는 네 개소에 걸쳐 <b>약 75 m</b> 올라가는데, 기준면은 네 개소가 같은 값을 써서 한 줄로 평평합니다.
+    </p>
+    <div id="chart"></div>
+    <div class="lgd" id="lgd"></div>
+    <div class="callout">
+      <b>±0.000 = <span class="num">582.22</span>가 네 개소 전부의 양수장 평면도 기준면입니다.</b>
+      로후르-2 부지는 <span class="num">772~783</span> m, 로후르-3은 <span class="num">805~808</span> m인데
+      평면도는 모두 <span class="num">582.22</span>를 씁니다. 건축 단면은 1·2·3번이 모두
+      <span class="num">733.15</span>, 변전소 입면은 네 개소가 모두 <span class="num">733.04</span>입니다.<br><br>
+      기준면이 개소별로 다르지 않다는 것은, <b>한 개소의 도면을 복사해 개소명만 바꿔 썼다</b>는 뜻입니다.
+      실제로 양수장 평면도는 1·2·3번이 이미지 해시 <b>거리 0</b>으로 완전히 동일합니다.
+    </div>
+    <p class="note">
+      로후르-0 부지 평면도에는 <b>지반고 기입이 없습니다</b> — 측점 좌표만 있습니다.
+      그래서 0번 막대는 «미기입»으로 표시했습니다. 0번은 신설 건물이라 평면도 <span class="num">582.22</span>와
+      단면도 <span class="num">699.58</span>이 따로 있고, 철거 대상 기존 건물은 <span class="num">733.04</span>를 씁니다.
+    </p>
+  </section>
+
+  <section class="sec">
+    <h2>개소별 보완본 3D 검토</h2>
+    <p class="cap">카드를 누르면 보완본 기준으로 세운 3D 화면이 열립니다. 화면 안 <b>검토자료</b> 버튼에서 앨범별 원본 PDF를 볼 수 있습니다.</p>
+    <div class="cards" id="cards"></div>
+    <div class="alt" id="alt"></div>
+  </section>
+
+  <section class="sec">
+    <h2>보완본에서 새로 확인된 것 <em>신규 18건 요약</em></h2>
+    <p class="cap">2026-08 검토에 없던 항목입니다. 개소별 상세는 각 3D 화면의 우측 패널에 있습니다.</p>
+    <table class="tbl">
+      <thead><tr>
+        <th style="width:34%">항목</th>
+        <th class="c" style="width:7%">0</th><th class="c" style="width:7%">1</th>
+        <th class="c" style="width:7%">2</th><th class="c" style="width:7%">3</th>
+        <th>내용</th>
+      </tr></thead>
+      <tbody id="newtbl"></tbody>
+    </table>
+  </section>
+
+  <section class="sec">
+    <h2>앨범 재사용 <em>이미지 해시 230장 전수</em></h2>
+    <p class="cap">해밍거리 <b>0</b>은 완전히 같은 도면이라는 뜻입니다. 개소별로 실제 작성된 것은 <b>부지 평면도뿐</b>입니다.</p>
+    <table class="tbl">
+      <thead><tr>
+        <th style="width:26%">도면</th><th style="width:16%">공용 범위</th>
+        <th class="c" style="width:10%">거리</th><th>비고</th>
+      </tr></thead>
+      <tbody id="reuse"></tbody>
+    </table>
+  </section>
+
+  <section class="sec">
+    <h2>설계사 회신 요청 <em>보완본 기준 · 우선순위</em></h2>
+    <p class="cap">1~3번은 회신 전까지 후속 검토를 진행할 수 없습니다.</p>
+    <ol class="asks" id="asks"></ol>
+  </section>
+
+</div>
+
+<footer><div class="wrap">
+  <span>발주 · 토지개량 및 관개청 / 타지킬리보드호즈</span>
+  <span>설계 · ГУП «Точикгипроводхоз»</span>
+  <span>독립 검토 자료 — 대외 공개용 아님</span>
+</div></footer>
+
+<script>
+/* ═══ 데이터 — 전부 2026-11 보완본 기재값 ═══════════════════ */
+var SITES = [
+  { n:0, nm:'로후르-0', kind:'양수장 신축 · 부대시설',
+    albums:'4개 · 51장', detail:'ТХ 15 / 전실 16 / 당직실 13 / 화장실 7',
+    fixed:3, unfixed:10, nw:3,
+    ground:null, groundNote:'미기입 (측점 좌표만)',
+    datum:'582.22 / 699.58', plan:'6 500 × 28 300', brief:'6,5 × 30,0 m',
+    pump:'KQSN800-M17S ×4', crane:'ТЭ 10-921 (10 t)' },
+  { n:1, nm:'로후르-1', kind:'양수장 복구 · 변전소',
+    albums:'5개 · 60장', detail:'ТХ 17 / АС 16 / 전실 7 / 당직실 13 / 화장실 7',
+    fixed:0, unfixed:11, nw:5,
+    ground:[732.27,733.65], groundNote:'ТХ·АС 리스트4',
+    datum:'582.22 / 733.15', plan:'17 880 × 5 400', brief:'7,80 × 45,0 m',
+    pump:'KQSN800-M17S-625 ×3 + KQSN700-M9J-869 ×1', crane:'없음' },
+  { n:2, nm:'로후르-2', kind:'양수장 복구 · 변전소',
+    albums:'5개 · 58장', detail:'ТХ 15 / АС 16 / 전실 7 / 당직실 13 / 화장실 7',
+    fixed:0, unfixed:11, nw:5,
+    ground:[772.20,783.28], groundNote:'ТХ 리스트4',
+    datum:'582.22 / 733.15', plan:'17 880 × 5 400', brief:'7,80 × 45,0 m',
+    pump:'KQSN800-M17S-625 ×4', crane:'없음' },
+  { n:3, nm:'로후르-3', kind:'양수장 복구 · 변전소',
+    albums:'5개 · 61장', detail:'ТХ 18 / АС 16 / 전실 7 / 당직실 13 / 화장실 7',
+    fixed:0, unfixed:11, nw:5,
+    ground:[805.83,807.80], groundNote:'ТХ·АС 리스트4·6',
+    datum:'582.22 / 733.15', plan:'17 880 × 5 400', brief:'6,0 × 47,0 m',
+    pump:'KQSN700-M9J-869 ×3 + KQSN350-M9-415 ×1', crane:'없음' }
+];
+
+/* 네 개소에 걸쳐 평평한 기준면 */
+var DATUMS = [
+  { v:582.22, c:'#9c2f45', t:'±0.000 양수장 평면도', who:'0·1·2·3', dash:0 },
+  { v:733.15, c:'#245f8f', t:'±0.000 АС 건축 단면',  who:'1·2·3',   dash:0 },
+  { v:733.04, c:'#3d6b4a', t:'±0.00 변전소 입면',    who:'0·1·2·3', dash:5 },
+  { v:699.58, c:'#a55c14', t:'±0.000 0번 신설 단면', who:'0',       dash:5 }
+];
+
+var NEWS = [
+  ['양수장 평면도 3개소 완전 동일', 0,1,1,1,
+   '이미지 해시 <b>거리 0</b>. 표제란 개소명만 바뀌고 <code>17 880 × 5 400</code> · <code>±0,00 = 582,22</code>가 동일'],
+  ['평면도 ↔ 부지 조서 연장 불일치', 0,1,1,1,
+   '평면 <code>17 880</code> vs 조서 <code>45,0</code>(1·2번) · <code>47,0</code>(3번) m — <b>27~29 m</b> 차'],
+  ['건축 단면 ±0.000 = 733.15', 0,1,1,1,
+   '부지 실측과 <b>0.5 / 50.1 / 74.7 m</b> 차. АС 리스트8이 3개소 동일(중도리 <code>L=37200mm</code>)'],
+  ['모델명 끝자리 ↔ 사양서 임펠러', 0,1,1,1,
+   '같은 줄 안에서 <code>625↔615,8</code> · <code>869↔862,8</code> · <code>415↔408,5</code>'],
+  ['АС 앨범 = 양수장 2장 + 변전소 8장', 0,1,1,1,
+   '9장에서 표1 재시작. 양수장 <b>평면·입면·기초도 없음</b>'],
+  ['전동기 Y500-8 정격 2종', 0,1,0,1,
+   '로후르-1 <b>560 kW</b> vs 로후르-3 <b>640 kW</b> — 같은 모델'],
+  ['같은 건물에 ±0.000 2종', 1,0,0,0,
+   '평면 <code>582,22</code> vs 단면 <code>699,58</code> — <b>117.36 m</b> 차'],
+  ['횡방향 구간합 ≠ 총폭', 1,0,0,0,
+   '총폭 <code>6 500</code> vs 구간 <code>2300+3000+1600 = 6 900</code>'],
+  ['«전실» 앨범에 변전소 8장 합본', 1,0,0,0,
+   '16장 = 전실 8장 + 변전소 АС 8장. 1·2·3번과 거리 0'],
+  ['부지 평면도 지반고 미기입', 1,0,0,0,
+   '측점 좌표만 있고 표고 기입 없음 — 기준면 검증 불가']
+];
+
+var REUSE = [
+  ['양수장 평면도 (ТХ)', '1·2·3', 0, '<code>L1-TX-11 = L2-TX-10 = L3-TX-12</code>'],
+  ['기초 평면도 (ТХ)', '1·3', 0, '2번은 거리 2 — 사실상 동일'],
+  ['펌프 특성·프레임 (ТХ)', '1·2', 0, '<code>L1-TX-7·8 = L2-TX-7·8</code>'],
+  ['변전소 입면·지붕·창호 (АС)', '0·1·2·3', 0, '0번은 «전실» 앨범 뒤쪽 8장'],
+  ['АС 건축 단면', '1·2·3', '≈0', '<code>±0.000 (733,15)</code> · 중도리 <code>L=37200mm</code>'],
+  ['당직실 13장', '0·1·2·3', 0, '리스트 4·5·7·8·9·10·11·13'],
+  ['화장실 7장', '0·1·2·3', 0, '리스트 4·5·7'],
+  ['전실 (ГР)', '0·1·2·3', 0, '리스트 6·7'],
+  ['부지 평면도', '—', '—', '<b>개소별로 작성된 유일한 도면</b>']
+];
+
+var ASKS = [
+  ['양수장 평면도의 개소별 재작성','현재 1·2·3번이 동일 도면입니다. 각 개소 실제 연장(45 / 45 / 47 m)과 내부 배치를 반영해 주십시오.'],
+  ['±0.000 확정 절대표고 고시','0번 582.22 / 699.58, 1·2·3번 582.22 / 733.15. 단일 기준점을 정하고 전 도면을 일괄 환산해 주십시오.'],
+  ['양수장 본체 건축 도면 제출','0번은 АС 앨범 자체가 없고, 1·2·3번은 지붕 평면과 단면 2장뿐입니다. 평면·입면·기초도가 필요합니다.'],
+  ['양중설비 사양 반영','1·2·3번 사양서에 크레인·호이스트가 없습니다. 인양 대상은 세트당 9 905~11 698 kg입니다.'],
+  ['진공펌프 · NPSH 검토서 · 최저 운전수위','0번만 ВВН1-6 2대가 계상됐습니다. 표고 733~808 m의 대기압 저하를 반영한 NPSH 값이 필요합니다.'],
+  ['펌프 모델명 ↔ 임펠러 직경 정정','625↔615,8 / 869↔862,8 / 415↔408,5 — 어느 쪽이 발주 사양인지 확정해 주십시오.'],
+  ['전동기 Y500-8 정격 확정','로후르-1은 560 kW, 로후르-3은 640 kW로 기입돼 있습니다.'],
+  ['변전소 도면 개소별 작성','네 개소가 동일 도면이며 모두 733,04를 씁니다.'],
+  ['개소별 철거 물량 실측','26298,0 / 19500,0 / 4960,0 / 3350,0이 네 개소 동일합니다.'],
+  ['원본 CAD(DWG/DXF)','보완본 230장이 전부 래스터입니다. 함께 받은 간략설명서는 벡터로 출력되고 있습니다.']
+];
+
+/* ═══ 히어로 차트 ═════════════════════════════════════════ */
+(function(){
+  var host=document.getElementById('chart');
+  var W=1000, H=400, PL=56, PR=168, PT=16, PB=30;
+  var LO=575, HI=815;
+  function y(v){ return PT + (H-PT-PB) * (1 - (v-LO)/(HI-LO)); }
+
+  var NS='http://www.w3.org/2000/svg';
+  function el(t,a){ var n=document.createElementNS(NS,t);
+    for(var k in a) n.setAttribute(k,a[k]); return n; }
+  var svg=el('svg',{viewBox:'0 0 '+W+' '+H,role:'img',
+    'aria-label':'개소별 부지 지반고와 도면 기준면 비교'});
+
+  /* 눈금 */
+  for(var t=580;t<=810;t+=20){
+    svg.appendChild(el('line',{x1:PL,y1:y(t),x2:W-PR,y2:y(t),
+      stroke:'#cdd2cb','stroke-width':1}));
+    var lb=el('text',{x:PL-8,y:y(t)+3.5,'text-anchor':'end',
+      'font-family':'ui-monospace,Menlo,monospace','font-size':10,fill:'#8b978f'});
+    lb.textContent=t; svg.appendChild(lb);
+  }
+  svg.appendChild(el('line',{x1:PL,y1:PT,x2:PL,y2:H-PB,stroke:'#b3bab4','stroke-width':1.5}));
+
+  /* 기준면 가로선 — 네 개소에 걸쳐 평평 */
+  // 선은 실제 표고, 라벨만 겹치면 밀어냅니다 (733.04 ↔ 733.15 는 0.2px 차)
+  var dys = DATUMS.map(function(d){ return y(d.v); });
+  var lys = dys.slice();
+  (function(){
+    var ord = lys.map(function(v,k){return k;}).sort(function(a,b){return lys[a]-lys[b];});
+    for(var i=1;i<ord.length;i++){
+      var a=ord[i-1], b=ord[i];
+      if(lys[b]-lys[a] < 26) lys[b] = lys[a] + 26;
+    }
+  })();
+
+  DATUMS.forEach(function(d,i){
+    var a={x1:PL,y1:dys[i],x2:W-PR,y2:dys[i],stroke:d.c,'stroke-width':2};
+    if(d.dash) a['stroke-dasharray']=d.dash+' '+d.dash;
+    svg.appendChild(el('line',a));
+    // 밀려난 라벨은 인출선으로 잇습니다
+    if(Math.abs(lys[i]-dys[i])>1){
+      svg.appendChild(el('path',{d:'M'+(W-PR)+','+dys[i]+' H'+(W-PR+5)
+        +' V'+lys[i]+' H'+(W-PR+10), fill:'none', stroke:d.c, 'stroke-width':1}));
+    }
+    var tx=el('text',{x:W-PR+13,y:lys[i]-1,'font-family':'ui-monospace,Menlo,monospace',
+      'font-size':11,'font-weight':700,fill:d.c});
+    tx.textContent=d.v.toFixed(2);
+    var t2=el('text',{x:W-PR+13,y:lys[i]+11,'font-family':'inherit','font-size':10,fill:'#56646e'});
+    t2.textContent=d.t+'  ·  '+d.who;
+    svg.appendChild(tx); svg.appendChild(t2);
+  });
+
+  /* 개소별 지반고 막대 */
+  var step=(W-PR-PL)/SITES.length;
+  SITES.forEach(function(s,i){
+    var cx=PL+step*(i+.5);
+    if(s.ground){
+      var y1=y(s.ground[1]), y2=y(s.ground[0]);
+      var h=Math.max(y2-y1,7);
+      svg.appendChild(el('rect',{x:cx-26,y:y1,width:52,height:h,
+        fill:'#1c2830',opacity:.9,rx:2}));
+      // 범위 상·하한 눈금
+      [y1,y1+h].forEach(function(yy){
+        svg.appendChild(el('line',{x1:cx-34,y1:yy,x2:cx+34,y2:yy,
+          stroke:'#1c2830','stroke-width':1}));
+      });
+      var v=el('text',{x:cx,y:y1-7,'text-anchor':'middle',
+        'font-family':'ui-monospace,Menlo,monospace','font-size':11,'font-weight':700,fill:'#1c2830'});
+      v.textContent=s.ground[0].toFixed(2)+'~'+s.ground[1].toFixed(2);
+      svg.appendChild(v);
+    } else {
+      // 미기입 — 점선 틀
+      svg.appendChild(el('rect',{x:cx-26,y:y(733.04),width:52,height:y(582.22)-y(733.04),
+        fill:'#8b978f',opacity:.10,stroke:'#8b978f','stroke-width':1.3,
+        'stroke-dasharray':'4 4',rx:2}));
+      var q=el('text',{x:cx,y:(y(733.04)+y(582.22))/2,'text-anchor':'middle',
+        'font-family':'inherit','font-size':11,'font-weight':700,fill:'#6f7a72'});
+      q.textContent='지반고'; svg.appendChild(q);
+      var q2=el('text',{x:cx,y:(y(733.04)+y(582.22))/2+14,'text-anchor':'middle',
+        'font-family':'inherit','font-size':11,'font-weight':700,fill:'#6f7a72'});
+      q2.textContent='미기입'; svg.appendChild(q2);
+    }
+    var nm=el('text',{x:cx,y:H-PB+16,'text-anchor':'middle',
+      'font-family':'inherit','font-size':12,'font-weight':700,fill:'#1c2830'});
+    nm.textContent=s.nm; svg.appendChild(nm);
+  });
+
+  /* 부지 상승 주기 */
+  var gy1=y(807.80), gy2=y(732.27);
+  var ax=PL+step*2.52;
+  svg.appendChild(el('line',{x1:ax,y1:gy1,x2:ax,y2:gy2,
+    stroke:'#8b978f','stroke-width':1,'stroke-dasharray':'3 3'}));
+  var rise=el('text',{x:ax+7,y:(gy1+gy2)/2,'font-family':'inherit','font-size':11,fill:'#56646e'});
+  rise.textContent='부지 상승 75.5 m';
+  svg.appendChild(rise);
+
+  host.appendChild(svg);
+
+  /* 범례 */
+  var lg=document.getElementById('lgd');
+  lg.innerHTML='<span><i class="bar" style="background:#1c2830"></i>부지 실측 지반고 범위</span>'
+    + DATUMS.map(function(d){
+        return '<span><i style="border-top-color:'+d.c+';border-top-style:'
+          +(d.dash?'dashed':'solid')+'"></i>'+d.t+'</span>'; }).join('');
+})();
+
+/* ═══ 카드 ════════════════════════════════════════════════ */
+(function(){
+  function row(k,v,cls){ return '<div><dt>'+k+'</dt><dd'+(cls?' class="'+cls+'"':'')+'>'+v+'</dd></div>'; }
+  var h='';
+  SITES.forEach(function(s){
+    h+='<a class="card" href="viewer/lokhur-'+s.n+'-rev2611.html">'
+      +'<div class="top"><div class="id">'+s.nm+'</div><div class="kind">'+s.kind+'</div></div>'
+      +'<dl>'
+      +row('앨범',s.albums)
+      +row('해소',s.fixed+'건', s.fixed?'ok':'')
+      +row('미해소',s.unfixed+'건','bad')
+      +row('신규',s.nw+'건','bad')
+      +row('±0.000',s.datum)
+      +row('부지 지반고', s.ground? s.ground[0].toFixed(2)+'~'+s.ground[1].toFixed(2) : '미기입')
+      +row('평면도',s.plan)
+      +row('조서',s.brief)
+      +row('양중',s.crane)
+      +'</dl>'
+      +'<div class="act"><span>보완본 3D 열기</span><span>&rarr;</span></div>'
+      +'</a>';
+  });
+  document.getElementById('cards').innerHTML=h;
+
+  var a='<span style="color:var(--ink2);align-self:center;margin-right:3px">다른 보기 ·</span>';
+  SITES.forEach(function(s){
+    a+='<a href="viewer/compare-'+s.n+'.html" target="_blank" rel="noopener">⬓ '+s.nm+' 기존↔보완 ↗</a>';
+  });
+  document.getElementById('alt').innerHTML=a;
+})();
+
+/* ═══ 신규 표 ═════════════════════════════════════════════ */
+(function(){
+  var h='';
+  NEWS.forEach(function(r){
+    h+='<tr><td><b>'+r[0]+'</b></td>';
+    for(var i=1;i<=4;i++)
+      h+='<td class="dot '+(r[i]?'y':'n')+'">'+(r[i]?'●':'·')+'</td>';
+    h+='<td style="color:var(--ink2);font-size:11.5px">'+r[5]+'</td></tr>';
+  });
+  document.getElementById('newtbl').innerHTML=h;
+})();
+
+/* ═══ 재사용 표 ═══════════════════════════════════════════ */
+(function(){
+  var h='';
+  REUSE.forEach(function(r){
+    h+='<tr><td>'+r[0]+'</td><td class="c">'+r[1]+'</td>'
+      +'<td class="c"'+(r[2]===0?' style="color:var(--carmine);font-weight:700"':'')+'>'+r[2]+'</td>'
+      +'<td style="color:var(--ink2);font-size:11.5px">'+r[3]+'</td></tr>';
+  });
+  document.getElementById('reuse').innerHTML=h;
+})();
+
+/* ═══ 요청 ════════════════════════════════════════════════ */
+(function(){
+  var h='';
+  ASKS.forEach(function(a){
+    h+='<li><b>'+a[0]+'</b> — <span style="color:var(--ink2)">'+a[1]+'</span></li>';
+  });
+  document.getElementById('asks').innerHTML=h;
+})();
+</script>
+
+<link rel="stylesheet" href="assets/docviewer.css">
+<script>window.LOKHUR_DOC={base:"docs/overall/",label:"4개소 통합 자료",btn:"검토 (전체)",mount:".mast .nav",push:false};</script>
+<script src="assets/docviewer.js"></script>
+</body>
+</html>
