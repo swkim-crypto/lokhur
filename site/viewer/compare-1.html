@@ -39,8 +39,10 @@ body{background:var(--pap);color:var(--ink);
 .pane .hd .tag{font:700 9.5px/14px var(--mono);padding:1px 6px;border-radius:2px;color:#fff}
 .pane.old .hd .tag{background:var(--old)}
 .pane.new .hd .tag{background:var(--new)}
-.pane .hd .pop{margin-left:auto;font-size:11px;font-weight:600;color:var(--sub);
+.pane .hd .pop{font-size:11px;font-weight:600;color:var(--sub);
   text-decoration:none;border:1px solid var(--line);border-radius:3px;padding:2px 7px;background:#fbfaf6}
+.pane .hd .pbtn{margin-left:auto;cursor:pointer;font-family:inherit;line-height:1;letter-spacing:1px}
+.pane .hd .pbtn+.pop{margin-left:6px}
 .pane .hd .pop:hover{border-color:var(--sub);color:var(--ink)}
 .pane iframe{flex:1;width:100%;border:0;background:#e8e5dd}
 .pane.hide{display:none}
@@ -76,6 +78,11 @@ body{background:var(--pap);color:var(--ink);
     <button class="btn" data-o="old">기존만</button>
     <button class="btn" data-o="new">보완만</button>
   </div>
+  <div class="grp" id="panels">
+    <button class="btn on" data-p="both">패널 둘 다</button>
+    <button class="btn" data-p="left">좌만</button>
+    <button class="btn" data-p="none">패널 숨김</button>
+  </div>
   <button class="btn" id="swap">↔ 좌우 바꾸기</button>
   <button class="btn" id="reset">50:50</button>
   <span class="sp"></span>
@@ -87,6 +94,7 @@ body{background:var(--pap);color:var(--ink);
     <div class="hd">
       <span class="tag">2026-08</span>
       <span>기존 검토 · 부적합 24건</span>
+      <button class="pop pbtn" type="button" data-pane="old" title="이 창의 패널 접기/펴기">◧◨</button>
       <a class="pop" href="lokhur-1.html" target="_blank" rel="noopener">새 창 ↗</a>
     </div>
     <iframe src="lokhur-1.html" title="로후르-1 기존 검토"></iframe>
@@ -98,6 +106,7 @@ body{background:var(--pap);color:var(--ink);
     <div class="hd">
       <span class="tag">2026-11</span>
       <span>보완본 · 해소 0 / 미해소 11 / 신규 5</span>
+      <button class="pop pbtn" type="button" data-pane="new" title="이 창의 패널 접기/펴기">◧◨</button>
       <a class="pop" href="lokhur-1-rev2611.html" target="_blank" rel="noopener">새 창 ↗</a>
     </div>
     <iframe src="lokhur-1-rev2611.html" title="로후르-1 보완본 검토"></iframe>
@@ -178,6 +187,45 @@ body{background:var(--pap);color:var(--ink);
     setRatio(stage.className==='vert'
       ? (e.clientY - r.top) / r.height
       : (e.clientX - r.left) / r.width);
+  });
+
+
+  /* ── 패널 제어 ──────────────────────────────────── */
+  var FR = { old: pOld.querySelector('iframe'), new: pNew.querySelector('iframe') };
+  var pstate = { old:{l:true,r:true}, new:{l:true,r:true} };
+
+  function send(which, l, r){
+    pstate[which] = {l:l, r:r};
+    var f = FR[which];
+    if (f && f.contentWindow){
+      try{ f.contentWindow.postMessage({type:'lokhur-panels', left:l, right:r}, '*'); }catch(e){}
+    }
+  }
+  function setBoth(l, r){ send('old', l, r); send('new', l, r); }
+
+  document.getElementById('panels').addEventListener('click', function(e){
+    var b=e.target.closest('button'); if(!b) return;
+    [].forEach.call(this.children,function(x){x.className='btn'+(x===b?' on':'');});
+    var p=b.dataset.p;
+    setBoth(p==='both'||p==='left', p==='both');
+  });
+
+  // 창별 토글
+  [].forEach.call(document.querySelectorAll('.pbtn'), function(b){
+    b.addEventListener('click', function(ev){
+      ev.preventDefault();
+      var w=b.dataset.pane, s=pstate[w];
+      var anyOn = s.l || s.r;
+      send(w, !anyOn, !anyOn);
+    });
+  });
+
+  // iframe 로드 후 현재 설정을 다시 적용 (새로고침 대비)
+  ['old','new'].forEach(function(w){
+    var f=FR[w];
+    if(f) f.addEventListener('load', function(){
+      setTimeout(function(){ var s=pstate[w]; send(w, s.l, s.r); }, 120);
+    });
   });
 
   /* ── 단축키 ─────────────────────────────────────── */
