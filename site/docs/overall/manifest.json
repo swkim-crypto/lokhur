@@ -1,15 +1,26 @@
 {
   "site": "overall",
   "label": "4개소 통합 자료",
-  "updated": "2026-08-11",
+  "updated": "2026-11-04",
   "documents": [
+    {
+      "id": "rev2611-compare",
+      "title": "보완본 대조표",
+      "type": "html",
+      "file": "lokhur-rev2611-compare.html",
+      "download": "lokhur-rev2611-compare.md",
+      "group": "Update · 2026-11 보완본",
+      "groupNew": true,
+      "note": "2026-11 보완본 검토 결과 — 해소 3 · 미해소 10 · 신규 3 · 해시 대조 230장"
+    },
     {
       "id": "brief-all",
       "title": "간략설명 · 4개소 통합",
       "type": "html",
       "file": "lokhur-all-brief.html",
       "download": "lokhur-all-brief.docx",
-      "note": "Краткое описание · 로후르-0~3 설비 사양표 4건 + 공사개요 · 러시아어 원문"
+      "note": "Краткое описание · 로후르-0~3 설비 사양표 4건 + 공사개요 · 러시아어 원문",
+      "group": "기존 검토 · 2026-08"
     }
   ]
 }
