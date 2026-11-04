@@ -1,7 +1,7 @@
 {
   "site": "lokhur-2",
   "label": "로후르-2",
-  "updated": "2026-08-11",
+  "updated": "2026-11-04",
   "documents": [
     {
       "id": "brief-ko",
@@ -9,14 +9,61 @@
       "type": "html",
       "file": "lokhur2-brief-ko.html",
       "download": "lokhur2-brief-ko.docx",
-      "note": "설계사 «Краткое описание» 번역본 · 원본 DOCX 내려받기 가능"
+      "note": "설계사 «Краткое описание» 번역본 · 원본 DOCX 내려받기 가능",
+      "group": "기존 검토 · 2026-08"
     },
     {
       "id": "brief-ru",
       "title": "간략설명 · 원문",
       "type": "pdf",
       "file": "lokhur2-brief-ru.pdf",
-      "note": "Краткое описание · 벡터 PDF · A1 1장 (텍스트 검색 가능)"
+      "note": "Краткое описание · 벡터 PDF · A1 1장 (텍스트 검색 가능)",
+      "group": "기존 검토 · 2026-08"
+    },
+    {
+      "id": "rev2611-tx",
+      "title": "ТХ 공정",
+      "type": "pdf",
+      "file": "lokhur2-rev2611-tx.pdf",
+      "group": "Update · 2026-11 보완본",
+      "groupNew": true,
+      "note": "기술부 — 수력기계 배치·관로·설비 사양 · 15장 · 2026-11 현장 수령"
+    },
+    {
+      "id": "rev2611-ac",
+      "title": "АС 건축",
+      "type": "pdf",
+      "file": "lokhur2-rev2611-ac.pdf",
+      "group": "Update · 2026-11 보완본",
+      "groupNew": true,
+      "note": "건축부 — 양수장 본체 및 변전소 · 16장 · 2026-11 현장 수령"
+    },
+    {
+      "id": "rev2611-avan",
+      "title": "전실",
+      "type": "pdf",
+      "file": "lokhur2-rev2611-avan.pdf",
+      "group": "Update · 2026-11 보완본",
+      "groupNew": true,
+      "note": "аванкамера — 전실 수공구조물 · 7장 · 2026-11 현장 수령"
+    },
+    {
+      "id": "rev2611-duty",
+      "title": "당직실",
+      "type": "pdf",
+      "file": "lokhur2-rev2611-duty.pdf",
+      "group": "Update · 2026-11 보완본",
+      "groupNew": true,
+      "note": "дежурное помещение · 13장 · 2026-11 현장 수령"
+    },
+    {
+      "id": "rev2611-wc",
+      "title": "화장실",
+      "type": "pdf",
+      "file": "lokhur2-rev2611-wc.pdf",
+      "group": "Update · 2026-11 보완본",
+      "groupNew": true,
+      "note": "уборная · 7장 · 2026-11 현장 수령"
     }
   ]
 }

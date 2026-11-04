@@ -133,3 +133,37 @@
 @media (prefers-reduced-motion:reduce){
   .dk-ov,.dk-modal,.dk-btn{ transition:none; }
 }
+
+/* ── 그룹 탭 줄 (헤더 아래 별도 행) ───────────────────────── */
+.dk-tabrow{
+  flex:none; display:flex; align-items:center; gap:0;
+  padding:7px 12px; background:#16202a; border-bottom:1px solid #55606c;
+  overflow-x:auto; overflow-y:hidden; scrollbar-width:thin;
+}
+.dk-tabrow::-webkit-scrollbar{ height:5px; }
+.dk-tabrow::-webkit-scrollbar-thumb{ background:#46525f; border-radius:3px; }
+.dk-grp{
+  flex:none; margin-right:9px; padding:2px 8px; border-radius:2px;
+  background:#2b3a49; color:#9fb0c0;
+  font:700 10px/16px "Malgun Gothic","Apple SD Gothic Neo",system-ui,sans-serif;
+  letter-spacing:.3px; white-space:nowrap;
+}
+.dk-grp.dk-new{ background:#8a4a18; color:#ffe4c9; }
+.dk-div{ flex:none; width:1px; height:20px; margin:0 12px; background:#3c4855; }
+
+/* span 으로 만든 탭 — button 기본 스타일이 없으므로 직접 지정 */
+.dk-tabrow .dk-tab,.dk-tabs .dk-tab{
+  display:inline-flex; align-items:center; box-sizing:border-box;
+  user-select:none; white-space:nowrap;
+}
+.dk-tabrow .dk-tab{ height:26px; padding:0 12px; }
+.dk-tabrow .dk-tab + .dk-tab{ border-left:none; }
+.dk-tabrow .dk-tab:first-of-type{ border-radius:3px 0 0 3px; }
+.dk-tabrow .dk-grp + .dk-tab{ border-radius:3px 0 0 3px; border-left:1px solid #46525f; }
+.dk-tabrow .dk-tab:last-child{ border-radius:0 3px 3px 0; }
+
+@media (max-width:720px){
+  .dk-tabrow{ padding:6px 8px; }
+  .dk-grp{ margin-right:6px; }
+  .dk-div{ margin:0 7px; }
+}

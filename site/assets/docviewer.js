@@ -85,21 +85,35 @@
     hd.appendChild(el('span', 'dk-ttl', (m.label || CFG.label || '') + ' 검토자료'));
     hd.appendChild(el('span', 'dk-sub', m.updated ? '갱신 ' + m.updated : ''));
 
-    var tb = el('div', 'dk-tabs');
+    // 문서에 group 이 있으면 탭을 헤더 아래 별도 줄로 내립니다.
+    var grouped = docs.some(function (d) { return d.group; });
+    var tb = el('div', grouped ? 'dk-tabrow' : 'dk-tabs');
+    var seen = null;
     docs.forEach(function (d, i) {
-      var t = el('button', 'dk-tab', d.title || ('문서 ' + (i + 1)));
-      t.type = 'button';
+      if (grouped && d.group !== seen) {
+        if (seen !== null) tb.appendChild(el('span', 'dk-div'));
+        var g = el('span', 'dk-grp' + (d.groupNew ? ' dk-new' : ''), d.group);
+        tb.appendChild(g);
+        seen = d.group;
+      }
+      var t = el('span', 'dk-tab', d.title || ('문서 ' + (i + 1)));
+      t.setAttribute('role', 'tab');
+      t.setAttribute('tabindex', '0');
       t.addEventListener('click', function () { show(i); });
+      t.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); show(i); }
+      });
       tabs.push(t); tb.appendChild(t);
     });
-    hd.appendChild(tb);
+    if (grouped) { mod.appendChild(hd); mod.appendChild(tb); }
+    else { hd.appendChild(tb); }
 
     var x = el('button', 'dk-x', '\u00d7');
     x.type = 'button'; x.title = '닫기 (Esc)';
     x.setAttribute('aria-label', '닫기');
     x.addEventListener('click', close);
     hd.appendChild(x);
-    mod.appendChild(hd);
+    if (!grouped) mod.appendChild(hd);
 
     var bar = el('div', 'dk-bar');
     bar.appendChild(el('span', 'dk-note', ''));
