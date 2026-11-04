@@ -33,7 +33,8 @@ a{color:inherit}
 .mast .wrap{display:flex; align-items:baseline; gap:16px; flex-wrap:wrap; padding-top:20px; padding-bottom:14px}
 .mast h1{margin:0; font-size:19px; font-weight:800; letter-spacing:-.5px}
 .mast .ru{font-size:12px; color:var(--ink2); font-style:italic}
-.mast .tag{margin-left:auto; display:flex; border:1px solid var(--rule); background:var(--card)}
+.mast .acts{margin-left:auto; display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+.mast .tag{display:flex; border:1px solid var(--rule); background:var(--card)}
 .mast .tag b{display:block; padding:5px 11px; font-size:11px; font-weight:600; color:var(--ink2); border-right:1px solid var(--rule2)}
 .mast .tag b:last-child{border-right:none}
 .mast .tag b i{font-style:normal; color:var(--carmine); font-weight:800}
@@ -153,7 +154,8 @@ footer .wrap span:last-child{margin-left:auto}
 @media (max-width:960px){ .cards{grid-template-columns:repeat(2,1fr)} }
 @media (max-width:700px){
   .wrap{padding:0 16px}
-  .mast .tag{margin-left:0; width:100%}
+  .mast .acts{margin-left:0; width:100%}
+  .mast .tag{width:100%}
   .cards{grid-template-columns:1fr}
   #ladder{height:auto !important}
   #ladder .axis,#ladder .grid,#ladder .gl,#ladder svg.leads,.lvl,.rise{display:none}
@@ -174,10 +176,13 @@ footer .wrap span:last-child{margin-left:auto}
   <div class="wrap">
     <h1>로후르 양수장 설계도면 검토</h1>
     <span class="ru">Баркарорсозии пойгоххои обкашии Лохур-0…3 дар нохияи Рудаки</span>
-    <div class="tag">
-      <b>실시설계 РП</b><b>두샨베-2026</b><b>부적합 <i>90</i>건</b>
+    <div class="acts">
+      <div class="tag">
+        <b>실시설계 РП</b><b>두샨베-2026</b><b>부적합 <i>90</i>건</b>
+      </div>
+      <a href="guide.html" style="display:inline-flex;align-items:center;height:30px;padding:0 12px;border:1px solid #b3bab4;border-radius:3px;background:#fff;color:#56646e;font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap">? 사용법</a>
+      <a href="rev2611.html" style="display:inline-flex;align-items:center;height:30px;padding:0 13px;border:1.5px solid #8a4a18;border-radius:3px;background:#8a4a18;color:#ffe4c9;font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap">보완설계 2026-11 &rarr;</a>
     </div>
-    <a href="rev2611.html" style="display:inline-flex;align-items:center;height:30px;padding:0 13px;margin-left:8px;border:1.5px solid #8a4a18;border-radius:3px;background:#8a4a18;color:#ffe4c9;font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap">보완설계 2026-11 &rarr;</a>
   </div>
 </div>
 
@@ -513,7 +518,7 @@ function declutter(ys, min, lo, hi) {
 })();
 </script>
 <!-- 통합 검토 자료 패널 -->
-<script>window.LOKHUR_DOC={base:"docs/overall/",label:"통합 검토 자료",btn:"검토 (전체)",mount:".mast .wrap",push:false};</script>
+<script>window.LOKHUR_DOC={base:"docs/overall/",label:"통합 검토 자료",btn:"검토 (전체)",mount:".mast .acts",push:false};</script>
 <script src="assets/docviewer.js"></script>
 </body>
 </html>

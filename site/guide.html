@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>사용 안내 · 로후르 양수장 설계도면 검토</title>
+<meta name="description" content="로후르 검토 시스템 사용법 — 세 가지 보기, 3D 조작, 패널 접기, 비교 화면">
+<style>
+:root{
+  --film:#dde1db; --film2:#edefea; --card:#f5f6f2;
+  --ink:#1c2830; --ink2:#56646e; --ink3:#8b978f;
+  --rule:#b3bab4; --rule2:#cdd2cb;
+  --blue:#245f8f; --carmine:#9c2f45; --rev:#8a4a18; --revbg:#faf3ea; --moss:#3d6b4a;
+  --mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,"D2Coding",monospace;
+  --sans:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--film);color:var(--ink);
+  font:14px/1.75 var(--sans);letter-spacing:-.1px;-webkit-font-smoothing:antialiased}
+.wrap{max-width:900px;margin:0 auto;padding:0 26px}
+a{color:inherit}
+code{font-family:var(--mono);font-size:12px;background:#e4e7e1;
+  padding:1px 5px;border-radius:2px;white-space:nowrap}
+kbd{font-family:var(--mono);font-size:11.5px;background:#fff;border:1px solid var(--rule);
+  border-bottom-width:2px;border-radius:3px;padding:1px 7px;white-space:nowrap}
+
+.mast{border-bottom:1.5px solid var(--ink);background:var(--film2)}
+.mast .wrap{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;
+  padding-top:20px;padding-bottom:14px}
+.mast h1{margin:0;font-size:19px;font-weight:800;letter-spacing:-.5px}
+.mast .sub{font-size:12px;color:var(--ink2)}
+.mast .nav{margin-left:auto;display:flex;gap:7px}
+.mast .nav a{display:inline-flex;align-items:center;height:28px;padding:0 11px;
+  border:1px solid var(--rule);border-radius:3px;background:#fff;color:var(--ink2);
+  font-size:11.5px;font-weight:600;text-decoration:none;white-space:nowrap}
+.mast .nav a:hover{border-color:var(--ink2);color:var(--ink)}
+
+/* ═══ 단계 ═══ */
+.step{padding:34px 0 0}
+.step>h2{display:flex;align-items:baseline;gap:11px;margin:0 0 4px;
+  font-size:19px;font-weight:800;letter-spacing:-.5px;
+  padding-bottom:10px;border-bottom:2px solid var(--ink)}
+.step>h2 .no{flex:none;font-family:var(--mono);font-size:13px;font-weight:700;
+  color:#fff;background:var(--ink);border-radius:2px;padding:2px 8px;line-height:1.5}
+.step>h2 em{font-style:normal;font-weight:600;font-size:12.5px;color:var(--ink2);
+  margin-left:auto;letter-spacing:-.2px}
+.step p{margin:12px 0 0;max-width:720px}
+.step p.lead{font-size:14.5px}
+.step .muted{color:var(--ink2);font-size:12.5px}
+
+/* ═══ 도해 ═══ */
+.fig{margin:18px 0 0;background:var(--card);border:1px solid var(--rule);
+  border-radius:3px;padding:16px}
+.fig svg{display:block;width:100%;height:auto}
+.fig figcaption{margin:11px 0 0;padding-top:10px;border-top:1px solid var(--rule2);
+  font-size:11.5px;color:var(--ink2)}
+
+/* ═══ 번호 설명 ═══ */
+.keys{list-style:none;margin:16px 0 0;padding:0;display:grid;
+  grid-template-columns:repeat(2,1fr);gap:0 22px}
+.keys li{display:flex;gap:9px;padding:7px 0;border-bottom:1px solid var(--rule2);
+  font-size:12.5px;line-height:1.6}
+.keys li b{flex:none;width:19px;height:19px;border-radius:50%;background:var(--ink);
+  color:#fff;font:700 10.5px/19px var(--mono);text-align:center;margin-top:2px}
+.keys li span{flex:1}
+.keys li i{font-style:normal;color:var(--ink2);display:block;font-size:11.5px}
+
+/* ═══ 강조 박스 ═══ */
+.tip{margin:16px 0 0;padding:13px 15px;background:var(--revbg);
+  border:1px solid #e0cdb8;border-left:4px solid var(--rev);font-size:13px;line-height:1.7}
+.tip b{font-weight:800}
+.warn{margin:16px 0 0;padding:13px 15px;background:#f7eef0;
+  border:1px solid #e3cdd2;border-left:4px solid var(--carmine);font-size:13px;line-height:1.7}
+
+/* ═══ 표 ═══ */
+.tbl{width:100%;border-collapse:collapse;font-size:12.5px;background:var(--card);margin:16px 0 0}
+.tbl th,.tbl td{border:1px solid var(--rule2);padding:8px 11px;text-align:left;vertical-align:top}
+.tbl thead th{background:var(--film2);font-weight:700;font-size:11.5px;color:var(--ink2)}
+.tbl td.k{width:124px;white-space:nowrap}
+
+/* ═══ 경로 카드 ═══ */
+.routes{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0 0}
+.route{background:var(--card);border:1px solid var(--rule);border-radius:3px;
+  padding:13px 14px 14px}
+.route .n{font:700 10.5px/16px var(--mono);color:#fff;background:var(--ink2);
+  padding:1px 7px;border-radius:2px;display:inline-block}
+.route h3{margin:8px 0 5px;font-size:14px;font-weight:800;letter-spacing:-.3px}
+.route p{margin:0;font-size:12px;color:var(--ink2);line-height:1.65}
+.route.rev{background:var(--revbg);border-color:#e0cdb8}
+.route.rev .n{background:var(--rev)}
+
+footer{margin-top:46px;padding:20px 0 40px;border-top:1.5px solid var(--ink);background:var(--film2)}
+footer .wrap{display:flex;gap:18px;flex-wrap:wrap;font-size:11.5px;color:var(--ink2)}
+
+@media (max-width:760px){
+  .wrap{padding:0 16px}
+  .mast .nav{margin-left:0;width:100%}
+  .keys{grid-template-columns:1fr}
+  .routes{grid-template-columns:1fr}
+}
+@media print{
+  body{background:#fff}
+  .mast .nav{display:none}
+  .step{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+
+<div class="mast">
+  <div class="wrap">
+    <h1>사용 안내</h1>
+    <span class="sub">로후르 양수장 설계도면 검토 시스템</span>
+    <div class="nav">
+      <a href="index.html">기존 검토 (2026-08)</a>
+      <a href="rev2611.html">보완설계 (2026-11)</a>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- ═══ 1 ═══════════════════════════════════════════════ -->
+  <section class="step">
+    <h2><span class="no">1</span>세 가지로 볼 수 있습니다<em>첫 화면에서 고릅니다</em></h2>
+    <p class="lead">
+      같은 양수장을 <b>2026-08에 받은 도면</b>과 <b>2026-11에 받은 보완 도면</b> 두 벌로 검토했습니다.
+      어느 쪽을 볼지, 아니면 둘을 나란히 볼지 먼저 정합니다.
+    </p>
+
+    <div class="routes">
+      <div class="route">
+        <span class="n">1</span>
+        <h3>이전 버전만</h3>
+        <p>첫 화면(<code>index.html</code>)에서 개소 카드를 누릅니다. 2026-08 도면 기준입니다.</p>
+      </div>
+      <div class="route rev">
+        <span class="n">2</span>
+        <h3>새 버전만</h3>
+        <p>첫 화면 우측 상단 <b>보완설계 2026-11 →</b> 버튼을 누른 뒤 개소를 고릅니다.</p>
+      </div>
+      <div class="route">
+        <span class="n">3</span>
+        <h3>나란히 비교</h3>
+        <p>어느 화면에서든 <b>⬓ 기존↔보완</b> 버튼을 누르면 새 창에 둘이 함께 뜹니다.</p>
+      </div>
+    </div>
+
+    <div class="tip">
+      <b>3D 화면 안에서도 바꿀 수 있습니다.</b>
+      화면 우측 상단에 <b>기존 08 · 보완 11 · 나란히 ↗</b> 세 버튼이 항상 붙어 있습니다.
+      지금 보고 있는 쪽이 검게 표시됩니다.
+    </div>
+  </section>
+
+  <!-- ═══ 2 ═══════════════════════════════════════════════ -->
+  <section class="step">
+    <h2><span class="no">2</span>3D 화면은 이렇게 생겼습니다<em>좌 · 중앙 · 우 세 부분</em></h2>
+    <p>
+      어느 개소를 열든 구성은 같습니다. 가운데가 3D이고 양옆에 패널이 있습니다.
+    </p>
+
+    <figure class="fig">
+      <svg viewBox="0 0 900 400" role="img" aria-label="3D 화면 구성 도해">
+        <!-- 상단 바 -->
+        <rect x="8" y="8" width="884" height="40" fill="#fbfaf6" stroke="#b3bab4"/>
+        <text x="22" y="33" font-size="13" font-weight="700" fill="#1c2830"
+          font-family="Malgun Gothic,sans-serif">로후르-2 양수장 · 보완본 3D 검토</text>
+        <rect x="248" y="18" width="78" height="20" rx="2" fill="#8a4a18"/>
+        <text x="287" y="32" font-size="10" font-weight="700" fill="#ffe4c9"
+          text-anchor="middle" font-family="monospace">REV 2026-11</text>
+        <!-- 모드 버튼 -->
+        <g>
+          <rect x="360" y="17" width="216" height="22" rx="3" fill="#fff" stroke="#cfc9bb"/>
+          <rect x="360" y="17" width="54" height="22" rx="3" fill="#23272e"/>
+          <text x="387" y="32" font-size="10" fill="#fff" text-anchor="middle"
+            font-family="Malgun Gothic,sans-serif">평면도</text>
+          <text x="441" y="32" font-size="10" fill="#6f6a5e" text-anchor="middle"
+            font-family="Malgun Gothic,sans-serif">중첩</text>
+          <text x="495" y="32" font-size="10" fill="#6f6a5e" text-anchor="middle"
+            font-family="Malgun Gothic,sans-serif">단면</text>
+          <text x="549" y="32" font-size="10" fill="#6f6a5e" text-anchor="middle"
+            font-family="Malgun Gothic,sans-serif">표고 충돌</text>
+        </g>
+        <!-- 전환 버튼 -->
+        <g>
+          <rect x="700" y="17" width="180" height="22" rx="3" fill="#fff" stroke="#cfc9bb"/>
+          <rect x="760" y="17" width="60" height="22" fill="#23272e"/>
+          <text x="730" y="32" font-size="10" fill="#6f6a5e" text-anchor="middle"
+            font-family="Malgun Gothic,sans-serif">기존 08</text>
+          <text x="790" y="32" font-size="10" fill="#fff" text-anchor="middle"
+            font-family="Malgun Gothic,sans-serif">보완 11</text>
+          <text x="850" y="32" font-size="10" fill="#6f6a5e" text-anchor="middle"
+            font-family="Malgun Gothic,sans-serif">나란히 ↗</text>
+        </g>
+        <!-- 좌 패널 -->
+        <rect x="8" y="48" width="170" height="344" fill="#fbfaf6" stroke="#b3bab4"/>
+        <text x="20" y="70" font-size="10" font-weight="700" fill="#6f6a5e"
+          font-family="Malgun Gothic,sans-serif">표고 스택</text>
+        <g font-family="monospace" font-size="10" fill="#1c2830">
+          <text x="20" y="92">783.28</text><text x="20" y="112">772.20</text>
+          <text x="20" y="132" fill="#a55c14">733.15</text>
+          <text x="20" y="152" fill="#a55c14">733.04</text>
+          <text x="20" y="172" fill="#a55c14">582.22</text>
+        </g>
+        <circle cx="150" cy="128" r="11" fill="#1c2830"/>
+        <text x="150" y="132" font-size="11" font-weight="700" fill="#fff"
+          text-anchor="middle" font-family="monospace">3</text>
+        <text x="20" y="208" font-size="10" font-weight="700" fill="#6f6a5e"
+          font-family="Malgun Gothic,sans-serif">레이어</text>
+        <g>
+          <rect x="20" y="218" width="9" height="9" fill="#245f8f"/>
+          <rect x="20" y="236" width="9" height="9" fill="#0f8f7a"/>
+          <rect x="20" y="254" width="9" height="9" fill="#c02a8f"/>
+          <text x="36" y="227" font-size="9.5" fill="#1c2830" font-family="Malgun Gothic,sans-serif">양수장</text>
+          <text x="36" y="245" font-size="9.5" fill="#1c2830" font-family="Malgun Gothic,sans-serif">펌프</text>
+          <text x="36" y="263" font-size="9.5" fill="#1c2830" font-family="Malgun Gothic,sans-serif">관로</text>
+        </g>
+        <circle cx="150" cy="240" r="11" fill="#1c2830"/>
+        <text x="150" y="244" font-size="11" font-weight="700" fill="#fff"
+          text-anchor="middle" font-family="monospace">4</text>
+        <text x="20" y="300" font-size="10" fill="#6f6a5e"
+          font-family="Malgun Gothic,sans-serif">절단면</text>
+        <rect x="20" y="308" width="140" height="5" rx="2" fill="#cfc9bb"/>
+        <circle cx="120" cy="310" r="6" fill="#245f8f"/>
+        <circle cx="150" cy="330" r="11" fill="#1c2830"/>
+        <text x="150" y="334" font-size="11" font-weight="700" fill="#fff"
+          text-anchor="middle" font-family="monospace">5</text>
+
+        <!-- 중앙 3D -->
+        <rect x="178" y="48" width="470" height="344" fill="#e8e5dd" stroke="#b3bab4"/>
+        <g opacity=".85">
+          <rect x="250" y="190" width="300" height="90" fill="#f4f2ec" stroke="#23272e"/>
+          <path d="M250,190 L400,140 L550,190" fill="#8c8678" stroke="#23272e"/>
+          <rect x="285" y="238" width="40" height="26" fill="#0f8f7a"/>
+          <rect x="350" y="238" width="40" height="26" fill="#0f8f7a"/>
+          <rect x="415" y="238" width="40" height="26" fill="#0f8f7a"/>
+          <rect x="480" y="238" width="40" height="26" fill="#0f8f7a"/>
+          <rect x="268" y="300" width="270" height="9" fill="#c02a8f"/>
+        </g>
+        <text x="413" y="372" font-size="11" fill="#6f6a5e" text-anchor="middle"
+          font-family="Malgun Gothic,sans-serif">끌기 회전 · 휠 확대</text>
+        <circle cx="413" cy="110" r="11" fill="#1c2830"/>
+        <text x="413" y="114" font-size="11" font-weight="700" fill="#fff"
+          text-anchor="middle" font-family="monospace">6</text>
+
+        <!-- 우 패널 -->
+        <rect x="648" y="48" width="244" height="344" fill="#fbfaf6" stroke="#b3bab4"/>
+        <text x="660" y="70" font-size="10" font-weight="700" fill="#6f6a5e"
+          font-family="Malgun Gothic,sans-serif">검토 결과</text>
+        <g>
+          <rect x="660" y="80" width="220" height="30" rx="3" fill="#fff" stroke="#cfc9bb"/>
+          <rect x="668" y="88" width="30" height="14" rx="2" fill="#d42a2a"/>
+          <text x="683" y="99" font-size="9" font-weight="700" fill="#fff"
+            text-anchor="middle" font-family="monospace">R01</text>
+          <text x="706" y="99" font-size="9.5" fill="#1c2830"
+            font-family="Malgun Gothic,sans-serif">양수장 평면도 3개소 동일</text>
+          <rect x="660" y="116" width="220" height="30" rx="3" fill="#fff" stroke="#cfc9bb"/>
+          <rect x="668" y="124" width="30" height="14" rx="2" fill="#d42a2a"/>
+          <text x="683" y="135" font-size="9" font-weight="700" fill="#fff"
+            text-anchor="middle" font-family="monospace">R02</text>
+          <text x="706" y="135" font-size="9.5" fill="#1c2830"
+            font-family="Malgun Gothic,sans-serif">평면도 ↔ 조서 불일치</text>
+          <rect x="660" y="152" width="220" height="30" rx="3" fill="#fff" stroke="#cfc9bb"/>
+          <rect x="668" y="160" width="30" height="14" rx="2" fill="#9c2f45"/>
+          <text x="683" y="171" font-size="9" font-weight="700" fill="#fff"
+            text-anchor="middle" font-family="monospace">R03</text>
+          <text x="706" y="171" font-size="9.5" fill="#1c2830"
+            font-family="Malgun Gothic,sans-serif">구간합 ≠ 총치수</text>
+        </g>
+        <circle cx="866" cy="200" r="11" fill="#1c2830"/>
+        <text x="866" y="204" font-size="11" font-weight="700" fill="#fff"
+          text-anchor="middle" font-family="monospace">7</text>
+
+        <!-- 우하단 패널 토글 -->
+        <g>
+          <rect x="756" y="352" width="128" height="26" rx="4" fill="#fff" stroke="#8b978f"/>
+          <text x="782" y="369" font-size="10.5" font-weight="700" fill="#4a5159"
+            text-anchor="middle" font-family="Malgun Gothic,sans-serif">◧ 좌</text>
+          <line x1="808" y1="352" x2="808" y2="378" stroke="#b3bab4"/>
+          <text x="828" y="369" font-size="10.5" font-weight="700" fill="#4a5159"
+            text-anchor="middle" font-family="Malgun Gothic,sans-serif">우 ◨</text>
+          <line x1="848" y1="352" x2="848" y2="378" stroke="#b3bab4"/>
+          <text x="866" y="369" font-size="10.5" font-weight="700" fill="#4a5159"
+            text-anchor="middle" font-family="Malgun Gothic,sans-serif">⤢</text>
+        </g>
+        <circle cx="730" cy="365" r="11" fill="#8a4a18"/>
+        <text x="730" y="369" font-size="11" font-weight="700" fill="#fff"
+          text-anchor="middle" font-family="monospace">8</text>
+
+        <!-- 상단 표식은 패널 위에 그립니다 -->
+        <circle cx="468" cy="58" r="11" fill="#1c2830"/>
+        <text x="468" y="62" font-size="11" font-weight="700" fill="#fff"
+          text-anchor="middle" font-family="monospace">2</text>
+        <circle cx="790" cy="58" r="11" fill="#1c2830"/>
+        <text x="790" y="62" font-size="11" font-weight="700" fill="#fff"
+          text-anchor="middle" font-family="monospace">1</text>
+      </svg>
+      <figcaption>보완본 3D 화면. 기존(2026-08) 화면도 배치는 같고 버튼 이름만 조금 다릅니다.</figcaption>
+    </figure>
+
+    <ul class="keys">
+      <li><b>1</b><span>화면 전환<i>기존 08 / 보완 11 / 나란히 ↗</i></span></li>
+      <li><b>2</b><span>보기 모드<i>무엇을 보여줄지 묶어서 바꿉니다</i></span></li>
+      <li><b>3</b><span>표고 스택<i>누르면 3D에 그 높이의 수평면이 뜹니다</i></span></li>
+      <li><b>4</b><span>레이어<i>건물·펌프·관로를 하나씩 끄고 켭니다</i></span></li>
+      <li><b>5</b><span>절단면<i>끌면 건물이 잘려 속이 보입니다</i></span></li>
+      <li><b>6</b><span>3D 화면<i>끌어서 회전, 휠로 확대</i></span></li>
+      <li><b>7</b><span>검토 결과<i>누르면 상세가 펼쳐지고 카메라가 그 위치로 갑니다</i></span></li>
+      <li><b>8</b><span>패널 접기<i>다음 항목에서 설명합니다</i></span></li>
+    </ul>
+  </section>
+
+  <!-- ═══ 3 ═══════════════════════════════════════════════ -->
+  <section class="step">
+    <h2><span class="no">3</span>그래픽을 크게 보려면 패널을 접습니다<em>가장 자주 쓰는 기능</em></h2>
+    <p class="lead">
+      양옆 패널이 화면의 절반 가까이를 차지합니다. <b>화면 우측 아래 세 버튼</b>으로 접으면
+      3D가 <b>두 배 가까이</b> 넓어집니다.
+    </p>
+
+    <figure class="fig">
+      <svg viewBox="0 0 900 250" role="img" aria-label="패널 접기 전후 비교">
+        <!-- 접기 전 -->
+        <text x="20" y="22" font-size="12" font-weight="700" fill="#1c2830"
+          font-family="Malgun Gothic,sans-serif">접기 전</text>
+        <rect x="20" y="32" width="400" height="140" fill="#e8e5dd" stroke="#b3bab4"/>
+        <rect x="20" y="32" width="88" height="140" fill="#cdd2cb" stroke="#b3bab4"/>
+        <rect x="296" y="32" width="124" height="140" fill="#cdd2cb" stroke="#b3bab4"/>
+        <text x="64" y="106" font-size="10" fill="#56646e" text-anchor="middle"
+          font-family="Malgun Gothic,sans-serif">표고</text>
+        <text x="358" y="106" font-size="10" fill="#56646e" text-anchor="middle"
+          font-family="Malgun Gothic,sans-serif">검토 결과</text>
+        <g opacity=".8">
+          <rect x="150" y="90" width="110" height="34" fill="#f4f2ec" stroke="#23272e"/>
+          <path d="M150,90 L205,70 L260,90" fill="#8c8678" stroke="#23272e"/>
+        </g>
+        <text x="202" y="160" font-size="10" fill="#8b978f" text-anchor="middle"
+          font-family="monospace">3D 폭 47%</text>
+
+        <!-- 화살표 -->
+        <path d="M444,102 L476,102" stroke="#8a4a18" stroke-width="2"/>
+        <path d="M470,96 L478,102 L470,108" fill="none" stroke="#8a4a18" stroke-width="2"/>
+        <text x="460" y="88" font-size="11" font-weight="700" fill="#8a4a18"
+          text-anchor="middle" font-family="Malgun Gothic,sans-serif">⤢</text>
+
+        <!-- 접은 후 -->
+        <text x="500" y="22" font-size="12" font-weight="700" fill="#8a4a18"
+          font-family="Malgun Gothic,sans-serif">접은 후</text>
+        <rect x="500" y="32" width="380" height="140" fill="#e8e5dd" stroke="#8a4a18" stroke-width="1.5"/>
+        <g opacity=".9">
+          <rect x="600" y="78" width="190" height="56" fill="#f4f2ec" stroke="#23272e"/>
+          <path d="M600,78 L695,46 L790,78" fill="#8c8678" stroke="#23272e"/>
+          <rect x="624" y="104" width="26" height="18" fill="#0f8f7a"/>
+          <rect x="666" y="104" width="26" height="18" fill="#0f8f7a"/>
+          <rect x="708" y="104" width="26" height="18" fill="#0f8f7a"/>
+          <rect x="750" y="104" width="26" height="18" fill="#0f8f7a"/>
+        </g>
+        <text x="690" y="160" font-size="10" fill="#8a4a18" text-anchor="middle"
+          font-family="monospace">3D 폭 100%</text>
+
+        <!-- 버튼 설명 -->
+        <g>
+          <rect x="20" y="196" width="150" height="30" rx="4" fill="#fff" stroke="#8b978f"/>
+          <text x="52" y="216" font-size="12" font-weight="700" fill="#4a5159"
+            text-anchor="middle" font-family="Malgun Gothic,sans-serif">◧ 좌</text>
+          <line x1="84" y1="196" x2="84" y2="226" stroke="#b3bab4"/>
+          <text x="109" y="216" font-size="12" font-weight="700" fill="#4a5159"
+            text-anchor="middle" font-family="Malgun Gothic,sans-serif">우 ◨</text>
+          <line x1="134" y1="196" x2="134" y2="226" stroke="#b3bab4"/>
+          <text x="152" y="216" font-size="12" font-weight="700" fill="#4a5159"
+            text-anchor="middle" font-family="Malgun Gothic,sans-serif">⤢</text>
+        </g>
+        <text x="186" y="208" font-size="12" fill="#1c2830"
+          font-family="Malgun Gothic,sans-serif">왼쪽 패널 · 오른쪽 패널 · 양쪽 한 번에</text>
+        <text x="186" y="224" font-size="11" fill="#56646e"
+          font-family="Malgun Gothic,sans-serif">화면 오른쪽 아래 구석에 항상 떠 있습니다</text>
+      </svg>
+      <figcaption>로후르-2는 양옆 패널이 696 px를 써서, 접으면 3D가 두 배로 넓어집니다.</figcaption>
+    </figure>
+
+    <table class="tbl">
+      <thead><tr><th class="k">누를 곳</th><th>하는 일</th><th class="k">단축키</th></tr></thead>
+      <tbody>
+        <tr><td class="k"><b>◧ 좌</b></td><td>왼쪽 패널(표고 스택·레이어)을 접거나 폅니다</td><td class="k"><kbd>[</kbd></td></tr>
+        <tr><td class="k"><b>우 ◨</b></td><td>오른쪽 패널(검토 결과 목록)을 접거나 폅니다</td><td class="k"><kbd>]</kbd></td></tr>
+        <tr><td class="k"><b>⤢ 넓게</b></td><td>양쪽을 한 번에 접습니다. 다시 누르면 펴집니다</td><td class="k"><kbd>\</kbd></td></tr>
+      </tbody>
+    </table>
+
+    <div class="tip">
+      <b>접힌 버튼은 검게 표시됩니다.</b> 지금 어느 쪽이 접혀 있는지 버튼 색으로 알 수 있습니다.
+      접은 상태에서도 3D 조작과 모드 전환은 그대로 됩니다.
+    </div>
+  </section>
+
+  <!-- ═══ 4 ═══════════════════════════════════════════════ -->
+  <section class="step">
+    <h2><span class="no">4</span>3D를 움직입니다<em>마우스 세 가지</em></h2>
+    <table class="tbl">
+      <thead><tr><th class="k">동작</th><th>결과</th></tr></thead>
+      <tbody>
+        <tr><td class="k">끌기 (드래그)</td><td>건물을 돌려 봅니다</td></tr>
+        <tr><td class="k">휠 굴리기</td><td>가까이 · 멀리</td></tr>
+        <tr><td class="k"><kbd>Shift</kbd> + 끌기</td><td>화면을 옆으로 밉니다 <span class="muted">(일부 화면만)</span></td></tr>
+      </tbody>
+    </table>
+    <p class="muted">
+      화면이 엉뚱한 데로 가버렸으면, 위쪽 <b>모드 버튼</b>을 아무거나 다시 누르면 제자리로 돌아옵니다.
+    </p>
+
+    <div class="tip">
+      <b>오른쪽 검토 결과 항목을 누르면 카메라가 알아서 갑니다.</b>
+      예를 들어 «양중설비 사양서에 없음»을 누르면 펌프와 천장이 보이는 각도로 이동합니다.
+      항목을 찾아다니지 말고 목록을 눌러 가며 보는 편이 빠릅니다.
+    </div>
+  </section>
+
+  <!-- ═══ 5 ═══════════════════════════════════════════════ -->
+  <section class="step">
+    <h2><span class="no">5</span>나란히 비교합니다<em>새 창으로 열립니다</em></h2>
+    <p>
+      왼쪽이 <b>2026-08 기존</b>, 오른쪽이 <b>2026-11 보완본</b>입니다.
+      두 화면은 각각 따로 돌아가므로, 한쪽을 돌려도 다른 쪽은 그대로입니다.
+    </p>
+
+    <figure class="fig">
+      <svg viewBox="0 0 900 230" role="img" aria-label="비교 화면 도해">
+        <!-- 툴바 -->
+        <rect x="8" y="8" width="884" height="34" fill="#fbfaf6" stroke="#b3bab4"/>
+        <text x="22" y="30" font-size="12" font-weight="700" fill="#1c2830"
+          font-family="Malgun Gothic,sans-serif">로후르-2 · 기존 ↔ 보완본</text>
+        <g>
+          <rect x="190" y="15" width="124" height="20" rx="3" fill="#23272e"/>
+          <text x="222" y="29" font-size="10" fill="#fff" text-anchor="middle"
+            font-family="Malgun Gothic,sans-serif">좌우</text>
+          <rect x="254" y="15" width="60" height="20" fill="#fff" stroke="#cfc9bb"/>
+          <text x="284" y="29" font-size="10" fill="#6f6a5e" text-anchor="middle"
+            font-family="Malgun Gothic,sans-serif">상하</text>
+        </g>
+        <circle cx="252" cy="54" r="10" fill="#1c2830"/>
+        <text x="252" y="58" font-size="10" font-weight="700" fill="#fff"
+          text-anchor="middle" font-family="monospace">1</text>
+        <g>
+          <rect x="330" y="15" width="150" height="20" rx="3" fill="#fff" stroke="#cfc9bb"/>
+          <text x="360" y="29" font-size="10" fill="#6f6a5e" text-anchor="middle"
+            font-family="Malgun Gothic,sans-serif">둘 다</text>
+          <text x="405" y="29" font-size="10" fill="#6f6a5e" text-anchor="middle"
+            font-family="Malgun Gothic,sans-serif">기존만</text>
+          <text x="450" y="29" font-size="10" fill="#6f6a5e" text-anchor="middle"
+            font-family="Malgun Gothic,sans-serif">보완만</text>
+        </g>
+        <circle cx="405" cy="54" r="10" fill="#1c2830"/>
+        <text x="405" y="58" font-size="10" font-weight="700" fill="#fff"
+          text-anchor="middle" font-family="monospace">2</text>
+        <g>
+          <rect x="496" y="15" width="160" height="20" rx="3" fill="#fff" stroke="#cfc9bb"/>
+          <text x="536" y="29" font-size="10" fill="#6f6a5e" text-anchor="middle"
+            font-family="Malgun Gothic,sans-serif">패널 둘 다</text>
+          <text x="590" y="29" font-size="10" fill="#6f6a5e" text-anchor="middle"
+            font-family="Malgun Gothic,sans-serif">좌만</text>
+          <rect x="612" y="15" width="44" height="20" fill="#23272e"/>
+          <text x="634" y="29" font-size="10" fill="#fff" text-anchor="middle"
+            font-family="Malgun Gothic,sans-serif">숨김</text>
+        </g>
+        <circle cx="634" cy="54" r="10" fill="#8a4a18"/>
+        <text x="634" y="58" font-size="10" font-weight="700" fill="#fff"
+          text-anchor="middle" font-family="monospace">3</text>
+
+        <!-- 두 창 -->
+        <rect x="8" y="74" width="436" height="148" fill="#141821" stroke="#b3bab4"/>
+        <rect x="8" y="74" width="436" height="18" fill="#245f8f"/>
+        <text x="20" y="87" font-size="10" font-weight="700" fill="#fff"
+          font-family="monospace">2026-08</text>
+        <g opacity=".9">
+          <rect x="120" y="140" width="200" height="40" fill="#2b3340" stroke="#9aa5b3"/>
+          <path d="M120,140 L220,118 L320,140" fill="#4a5362" stroke="#9aa5b3"/>
+        </g>
+
+        <rect x="456" y="74" width="436" height="148" fill="#e8e5dd" stroke="#b3bab4"/>
+        <rect x="456" y="74" width="436" height="18" fill="#8a4a18"/>
+        <text x="468" y="87" font-size="10" font-weight="700" fill="#ffe4c9"
+          font-family="monospace">2026-11</text>
+        <g opacity=".9">
+          <rect x="570" y="140" width="200" height="40" fill="#f4f2ec" stroke="#23272e"/>
+          <path d="M570,140 L670,118 L770,140" fill="#8c8678" stroke="#23272e"/>
+        </g>
+
+        <!-- 분할선 -->
+        <rect x="444" y="74" width="12" height="148" fill="#b3bab4"/>
+        <rect x="447" y="134" width="6" height="28" rx="3" fill="#6f6a5e"/>
+        <circle cx="450" cy="236" r="10" fill="#1c2830"/>
+        <text x="450" y="240" font-size="10" font-weight="700" fill="#fff"
+          text-anchor="middle" font-family="monospace">4</text>
+      </svg>
+      <figcaption>가운데 회색 띠가 분할선입니다. 끌어서 좌우 비율을 바꿀 수 있습니다.</figcaption>
+    </figure>
+
+    <ul class="keys">
+      <li><b>1</b><span>좌우 분할 ↔ 상하 분할<i>건물이 길어서 상하로 놓으면 길이 비교가 쉽습니다</i></span></li>
+      <li><b>2</b><span>한쪽만 크게<i>둘 다 / 기존만 / 보완만</i></span></li>
+      <li><b>3</b><span>양쪽 패널 한 번에<i>패널 둘 다 / 좌만 / 패널 숨김</i></span></li>
+      <li><b>4</b><span>분할선 끌기<i>비율 조정, <b>50:50</b> 버튼으로 되돌림</i></span></li>
+    </ul>
+
+    <div class="tip">
+      각 창 제목줄 오른쪽의 <b>◧◨</b>는 <b>그 창만</b> 접습니다.
+      그 옆 <b>새 창 ↗</b>를 누르면 그 화면만 따로 띄울 수 있습니다.
+    </div>
+  </section>
+
+  <!-- ═══ 6 ═══════════════════════════════════════════════ -->
+  <section class="step">
+    <h2><span class="no">6</span>원본 도면을 봅니다<em>검토자료 버튼</em></h2>
+    <p>
+      3D는 도면을 읽어 세운 것이므로, 근거가 되는 원본을 바로 볼 수 있게 해 두었습니다.
+      각 화면의 <b>검토자료</b> 버튼(숫자가 붙어 있습니다)을 누르면 창이 열립니다.
+    </p>
+    <table class="tbl">
+      <thead><tr><th class="k">어디서</th><th>무엇이 열리나</th></tr></thead>
+      <tbody>
+        <tr><td class="k">개소 3D 화면</td>
+            <td><b>기존 검토 · 2026-08</b> 간략설명서(한국어 · 원문)와
+                <b>Update · 2026-11</b> 보완본 앨범(ТХ 공정 · АС 건축 · 전실 · 당직실 · 화장실)이
+                탭으로 나뉘어 있습니다</td></tr>
+        <tr><td class="k">첫 화면 우측 상단</td>
+            <td><b>검토 (전체)</b> — 4개소 통합 대조표와 간략설명서</td></tr>
+      </tbody>
+    </table>
+    <p class="muted">
+      PDF가 안 보이면 창 위쪽 <b>새 탭으로 열기</b>를 누르십시오.
+      아이폰·아이패드에서는 창 안에 PDF가 잘 뜨지 않습니다.
+      한국어 번역본은 <b>원본 내려받기</b>로 Word 파일을 받을 수 있습니다.
+    </p>
+  </section>
+
+  <!-- ═══ 7 ═══════════════════════════════════════════════ -->
+  <section class="step">
+    <h2><span class="no">7</span>알아두면 좋은 것</h2>
+    <table class="tbl">
+      <thead><tr><th class="k">상황</th><th>이렇게 하십시오</th></tr></thead>
+      <tbody>
+        <tr><td class="k">3D가 안 뜹니다</td>
+            <td>오래된 브라우저이거나 그래픽 가속이 꺼져 있습니다.
+                이 경우에도 <b>좌측 표고 스택과 우측 검토 결과는 그대로 동작</b>하므로 내용은 모두 볼 수 있습니다.</td></tr>
+        <tr><td class="k">화면이 좁습니다</td>
+            <td>패널을 접으십시오(<kbd>\</kbd>). 그래도 좁으면 비교 화면에서 <b>상하 분할</b>로 바꾸십시오.</td></tr>
+        <tr><td class="k">숫자가 뭘 뜻하는지 모르겠습니다</td>
+            <td>우측 검토 결과에서 해당 항목을 누르면 출처 도면과 근거가 펼쳐집니다.</td></tr>
+        <tr><td class="k">휴대폰에서 봅니다</td>
+            <td>위아래로 쌓여서 나옵니다. 패널 접기 버튼은 숨겨집니다. 비교 화면은 PC를 권합니다.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="warn">
+      <b>대외 공개용 자료가 아닙니다.</b>
+      미공개 실시설계 도면과 부적합 지적 사항, 개소별 공사비가 들어 있습니다.
+      주소를 외부에 공유하지 마십시오.
+    </div>
+  </section>
+
+</div>
+
+<footer><div class="wrap">
+  <span>로후르 양수장 설계도면 검토 · 루다키 지구</span>
+  <span>독립 검토 자료 — 대외 공개용 아님</span>
+</div></footer>
+
+</body>
+</html>
