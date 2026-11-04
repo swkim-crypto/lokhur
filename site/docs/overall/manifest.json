@@ -1,17 +1,17 @@
 {
   "site": "overall",
   "label": "4개소 통합 자료",
-  "updated": "2026-11-04",
+  "updated": "2026-11-05",
   "documents": [
     {
       "id": "rev2611-compare",
-      "title": "보완본 대조표",
+      "title": "보완본 대조표 · 4개소",
       "type": "html",
       "file": "lokhur-rev2611-compare.html",
       "download": "lokhur-rev2611-compare.md",
       "group": "Update · 2026-11 보완본",
       "groupNew": true,
-      "note": "2026-11 보완본 검토 결과 — 해소 3 · 미해소 10 · 신규 3 · 해시 대조 230장"
+      "note": "2026-11 보완본 전수 검토 — 해소 3 · 미해소 43 · 신규 18 · 해시 대조 230장"
     },
     {
       "id": "brief-all",

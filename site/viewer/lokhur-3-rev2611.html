@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="ko"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>로후르-3 보완본(2026-11) 3D 검토</title>
+<style>
+:root{
+  --ink:#23272e; --pap:#f2f0ea; --line:#cfc9bb; --sub:#6f6a5e;
+  --red:#d42a2a; --blu:#1f5fd0; --mag:#c02a8f; --grn:#0f8f7a; --amb:#d9822b; --vio:#8a5cd6;
+  --mono:ui-monospace,Menlo,Consolas,"D2Coding",monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden}
+body{background:var(--pap);color:var(--ink);
+  font:13px/1.55 "Malgun Gothic","Apple SD Gothic Neo",system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased}
+#top{height:50px;display:flex;align-items:center;gap:12px;padding:0 14px;
+  border-bottom:1px solid var(--line);background:#fbfaf6}
+#top h1{margin:0;font-size:14px;font-weight:700;letter-spacing:-.2px;white-space:nowrap}
+#top .rev{padding:2px 8px;border-radius:2px;background:#8a4a18;color:#ffe4c9;
+  font:700 10px/16px var(--mono);letter-spacing:.3px;white-space:nowrap}
+#top .meta{font-size:11.5px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#modeBar{display:flex;border:1px solid var(--line);border-radius:3px;overflow:hidden;flex:none}
+#modeBar button{background:#fff;border:0;border-right:1px solid var(--line);padding:6px 12px;
+  font:inherit;font-size:12px;cursor:pointer;color:var(--sub);white-space:nowrap}
+#modeBar button:last-child{border-right:0}
+#modeBar button:hover{background:#f0ece2}
+#modeBar button.on{background:var(--ink);color:#fff}
+#wrap{position:absolute;top:50px;left:0;right:0;bottom:0;display:flex}
+#left{width:216px;flex:none;border-right:1px solid var(--line);background:#fbfaf6;overflow:auto;padding:11px}
+#mid{flex:1;position:relative;min-width:0;background:#e8e5dd}
+#right{width:330px;flex:none;border-left:1px solid var(--line);background:#fbfaf6;overflow:auto;padding:11px}
+h2.sec{margin:0 0 8px;font-size:10.5px;font-weight:700;letter-spacing:1.1px;color:var(--sub);text-transform:uppercase}
+.ev{display:flex;align-items:baseline;gap:6px;padding:4px 6px;border:1px solid transparent;
+  border-radius:3px;cursor:pointer;font-size:11.5px}
+.ev:hover{background:#fff;border-color:var(--line)}
+.ev.on{background:#fff;border-color:var(--ink)}
+.ev .v{font-family:var(--mono);font-weight:700;font-size:11.5px;min-width:54px}
+.ev .l{color:var(--sub);font-size:10px;flex:1;line-height:1.4}
+.ev.warn .v{color:var(--amb)}
+.evnote{margin:8px 0 13px;padding:8px;background:#fff;border:1px solid var(--line);
+  border-radius:3px;font-size:10.5px;line-height:1.6;color:var(--sub)}
+.evnote b{color:var(--red)}
+.lay{display:flex;align-items:center;gap:6px;padding:3px 0;font-size:11.5px;cursor:pointer}
+.lay input{margin:0}
+.sw{width:11px;height:11px;border-radius:2px;flex:none}
+#cutRow{margin-top:11px;font-size:11px;color:var(--sub)}
+#cut{width:100%;margin-top:4px}
+.grp{margin:11px 0 5px;font-size:10.5px;font-weight:700;color:var(--sub);letter-spacing:.4px}
+.iss{border:1px solid var(--line);border-radius:3px;background:#fff;margin-bottom:5px;cursor:pointer;overflow:hidden}
+.iss:hover{border-color:var(--sub)}
+.iss .hd{display:flex;align-items:center;gap:6px;padding:7px 8px}
+.iss .no{font:700 10px/14px var(--mono);color:#fff;background:var(--sub);padding:1px 5px;border-radius:2px;flex:none}
+.iss.n .no{background:var(--red)}
+.iss.f .no{background:var(--grn)}
+.iss.p .no{background:var(--amb)}
+.iss .t{font-size:11.5px;flex:1;line-height:1.4}
+.iss .st{font:700 9.5px/14px var(--mono);flex:none;letter-spacing:.3px}
+.iss.n .st{color:var(--red)}
+.iss.f .st{color:var(--grn)}
+.iss.p .st{color:var(--amb)}
+.iss .bd{display:none;padding:8px 8px 9px;font-size:11px;line-height:1.65;color:#3c3f45;
+  border-top:1px dashed var(--line)}
+.iss.open .bd{display:block}
+.iss .bd b{color:var(--red)}
+.iss .bd code{font-family:var(--mono);font-size:10.5px;background:#f2f0ea;padding:1px 4px;border-radius:2px}
+#err{position:absolute;inset:0;display:none;align-items:center;justify-content:center;
+  padding:30px;text-align:center;font-size:12.5px;color:var(--sub);line-height:1.8}
+#lab{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+#lab div{position:absolute;transform:translate(-50%,-50%);font:600 10px/1 var(--mono);
+  color:#2b2f36;background:rgba(251,250,246,.86);padding:2px 5px;border-radius:2px;
+  white-space:nowrap;border:1px solid var(--line)}
+#lab div[data-hide="1"]{display:none}
+#hint{position:absolute;left:10px;bottom:9px;font-size:10.5px;color:var(--sub);
+  background:rgba(251,250,246,.9);padding:4px 8px;border-radius:3px;border:1px solid var(--line)}
+@media (max-width:1280px){ #left{width:190px} #right{width:280px} #top .meta{display:none} }
+@media (max-width:1040px){
+  #left{width:160px;padding:9px} #right{width:234px;padding:9px}
+  #top{gap:8px;padding:0 9px} #top h1{font-size:12.5px}
+  .ev .v{min-width:46px} .ev .l{font-size:9.5px} .iss .t{font-size:11px}
+}
+@media (max-width:860px){ #left{width:136px} #right{width:196px} .ev .l{display:none} }
+@media (max-width:700px){
+  html,body{overflow:auto;height:auto}
+  #wrap{position:static;display:block}
+  #left,#right{width:auto;border:0;border-bottom:1px solid var(--line)}
+  #mid{height:60vh} .ev .l{display:block}
+}
+</style></head>
+<body>
+
+<div id="top">
+  <h1>로후르-3 양수장 · 보완본 3D 검토</h1>
+  <span class="rev">REV 2026-11</span>
+  <span class="meta">5개 앨범 61장 · ТХ 18 / АС 16 / 전실 7 / 당직실 13 / 화장실 7</span>
+  <div id="modeBar"></div>
+  <span style="margin-left:auto;display:inline-flex">
+    <a href="lokhur-3.html" style="height:26px;display:inline-flex;align-items:center;padding:0 10px;border:1px solid #cfc9bb;border-right:0;border-radius:3px 0 0 3px;background:#fff;color:#6f6a5e;font:600 11.5px/1 inherit;text-decoration:none;white-space:nowrap">기존 08</a>
+    <a href="lokhur-3-rev2611.html" style="height:26px;display:inline-flex;align-items:center;padding:0 10px;border:1px solid #cfc9bb;border-right:0;background:#23272e;color:#fff;font:600 11.5px/1 inherit;text-decoration:none;white-space:nowrap">보완 11</a>
+    <a href="compare-3.html" target="_blank" rel="noopener" style="height:26px;display:inline-flex;align-items:center;padding:0 10px;border:1px solid #cfc9bb;border-radius:0 3px 3px 0;background:#fff;color:#6f6a5e;font:600 11.5px/1 inherit;text-decoration:none;white-space:nowrap">나란히 ↗</a>
+  </span>
+</div>
+
+<div id="wrap">
+  <div id="left">
+    <h2 class="sec">표고 스택</h2>
+    <div id="evs"></div>
+    <div class="evnote">평면도 <b>582.22</b>와 건축 단면 <b>733.15</b>가 다릅니다.<br>부지 실측은 <b>807.80</b> 대입니다.</div>
+    <h2 class="sec">레이어</h2>
+    <div id="lays"></div>
+    <div id="cutRow">절단면 (종방향)<input type="range" id="cut" min="0" max="100" value="100"></div>
+  </div>
+  <div id="mid">
+    <div id="lab"></div><div id="err"></div>
+    <div id="hint">끌기 회전 · 휠 확대 · 우측 항목 클릭 시 이동</div>
+  </div>
+  <div id="right">
+    <h2 class="sec">보완본 검토 결과</h2>
+    <div id="issues"></div>
+  </div>
+</div>
+
+<script>
+/* ═══ A. 데이터 · 패널 ═══════════════════════════════════════ */
+var VIEW = null;
+var SITE = {"planL": 17.88, "planW": 5.4, "segs": [3.75, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 3.63], "briefL": 47.0, "briefW": 6.0, "avanL": 57.0, "avanW": 7.0, "bigN": 3};
+var EV = [{"v": 1457.05, "lab": "1457.05", "src": "당직실 리스트12 기초 단면", "grp": "other", "warn": true}, {"v": 807.8, "lab": "807.80", "src": "ТХ·АС 리스트4 부지", "grp": "site", "warn": false}, {"v": 807.41, "lab": "807.41", "src": "ТХ·АС·전실 리스트4 부지 지반고", "grp": "site", "warn": false}, {"v": 805.83, "lab": "805.83", "src": "ТХ·АС 리스트6", "grp": "site", "warn": false}, {"v": 733.15, "lab": "733.15", "src": "АС 리스트8 단면 ±0.000", "grp": "main", "warn": true}, {"v": 733.04, "lab": "733.04", "src": "АС 리스트11 변전소 입면 ±0.00", "grp": "sub", "warn": true}, {"v": 730.35, "lab": "730.35", "src": "АС 리스트8 기초 하단", "grp": "main", "warn": true}, {"v": 582.22, "lab": "582.22", "src": "ТХ 리스트12 평면 ±0,00", "grp": "ghost", "warn": true}, {"v": 580.97, "lab": "580.97", "src": "ТХ 리스트12 −1,25", "grp": "ghost", "warn": true}, {"v": 580.72, "lab": "580.72", "src": "ТХ 리스트12 −1,50", "grp": "ghost", "warn": true}, {"v": 579.62, "lab": "579.62", "src": "ТХ 리스트12·13 −2,60", "grp": "ghost", "warn": true}];
+var ISSUES = [{"sec": "A. 도면 간 건물 치수"}, {"n": "R01", "st": "신규", "k": "n", "t": "양수장 평면도가 1·2·3번 완전 동일", "cam": [8.94, 8, 30, 44], "d": "ТХ 양수장 평면도를 이미지 해시로 대조하면 로후르-1·2·3이 <b>해밍거리 0</b>입니다. 표제란의 개소명만 바뀌고 도형·치수·표고가 글자 하나까지 같습니다.<br><br>세 개소 모두 <code>17 880 × 5 400</code>, 구간 <code>3750+1500×7+3630</code>, <code>±0,00 = 582,22</code>로 기입돼 있습니다."}, {"n": "R02", "st": "신규", "k": "n", "t": "평면도 17 880 ↔ 부지 조서 47,0 m", "cam": [8.94, 6, 34, 50], "d": "같은 앨범 안에서 양수장 연장이 두 가지입니다.<br>· ТХ 양수장 평면도 <code>17 880</code><br>· ТХ·АС 부지 평면도 건물 조서 <code>6,0 × 47,0 m</code><br>· 간략설명서 <code>6,0 × 47,0 m</code><br><br>차이 <b>29,120 mm</b>. 평면도 쪽은 3개소 공용 도면이므로 이 개소의 실치수로 보기 어렵습니다."}, {"n": "R03", "st": "미해소", "k": "n", "t": "종방향 구간합 ≠ 총치수", "cam": [8.94, 5, 26, 42], "d": "구간 기입은 <code>3750 + 1500×7 + 3630 = 17 880</code>으로 총치수와 맞습니다. 그러나 내부 구획은 <code>3000 + 11150 + 2930 = 17 080</code>으로 <b>800 mm</b> 모자랍니다. 횡방향도 <code>1650+3000+1650 = 6 300</code> vs 총폭 <code>5 400</code>로 <b>900 mm</b> 초과입니다."}, {"sec": "B. 표고 기준면"}, {"n": "R04", "st": "미해소", "k": "n", "t": "582.22 계열이 평면도 주 표고로 잔존", "cam": [0, 10, 24, 36], "d": "양수장 평면도의 <code>±0,00 = 582,22</code>와 <code>−1,25=580,97</code> · <code>−1,50=580,72</code> · <code>−2,60=579,62</code>가 그대로입니다.<br><br>이 개소 부지 실측 지반고는 <b>805.83 · 807.41</b> 대인데 평면도 기준면은 582 m 대입니다."}, {"n": "R05", "st": "신규", "k": "n", "t": "건축 단면 ±0.000이 733.15 — 부지와 불일치", "cam": [8.94, 12, 28, 40], "d": "АС 리스트8 단면에 <code>±0.000 (733,15)</code>, 기초 하단 <code>730,35</code>로 기입돼 있습니다. 이는 <b>로후르-1 계열 표고</b>입니다.<br><br>이 개소 부지 지반고는 <code>807.80</code>이므로 <b>74.65 m</b> 차이입니다. АС 리스트8은 3개소가 사실상 같은 도면입니다(중도리 <code>L=37200mm</code> 동일)."}, {"n": "R06", "st": "미해소", "k": "n", "t": "변전소 입면 ±0.00 = 733.04", "cam": [-10, 9, 22, 38], "d": "АС 리스트11 변전소 입면이 <code>±0.00 (733,04)</code>, 능선 <code>+8,20</code>입니다. 로후르-0·1·2·3 네 개소가 <b>해밍거리 0</b>으로 동일한 도면입니다."}, {"n": "R07", "st": "미해소", "k": "n", "t": "1457.05 기초 단면 잔존", "cam": [0, 24, 30, 44], "d": "당직실 리스트12에 <code>(1457,05) ±0.00</code>이 그대로 있습니다. 네 개소 공통."}, {"sec": "C. 설비 · 양중"}, {"n": "R08", "st": "신규", "k": "n", "t": "모델명 끝자리 ↔ 사양서 임펠러 직경 불일치", "cam": [8.94, 7, 18, 32], "d": "설비 사양서 <b>같은 줄 안에서</b> 모순됩니다.<br>· 모델 <code>KQSN700-M9J-869</code> ↔ 사양 <code>Dk = 862,8 mm</code><br>· 모델 <code>KQSN350-M9-415</code> ↔ 사양 <code>Dk = 408,5 mm</code><br><br>모델명 끝 세 자리는 임펠러 직경을 뜻하므로 <b>625 ↔ 615,8</b>, <b>869 ↔ 862,8</b>, <b>415 ↔ 408,5</b>로 각각 어긋납니다."}, {"n": "R09", "st": "미해소", "k": "n", "t": "양중설비 사양서에 없음", "cam": [8.94, 11, 16, 30], "d": "설비 사양서에 <b>크레인·호이스트가 한 줄도 없습니다</b>. 인양 대상은 펌프+전동기 세트 <b>9,905 kg/대</b>(합계 31,465 kg)입니다.<br><br>로후르-0 보완본에는 <code>ТЭ 10-921</code>이 들어갔으나 이 개소에는 반영되지 않았습니다. 기존 크레인 정격·훅 유효높이도 여전히 미기재입니다."}, {"n": "R10", "st": "미해소", "k": "n", "t": "진공펌프 · 자흡 설비 미계상", "cam": [2, 8, 14, 30], "d": "사양서에 진공펌프(<code>ВВН</code>)가 없습니다. 배수펌프 <code>К 20/18</code> 2.2 kW 1대뿐입니다.<br><br>로후르-0에는 <code>ВВН1-6</code> 2대가 계상됐습니다. 최저 운전수위·NPSH 검토서도 전 개소 미제출입니다."}, {"n": "R11", "st": "확인", "k": "p", "t": "펌프 기초 4 565 ↔ 프레임", "cam": [6, 6, 14, 30], "d": "기초 평면도는 <code>400+1882,5+1882,5+400 = 4 565</code> × 2 000입니다. 로후르-1·3은 해밍거리 0으로 같은 도면이고 2번은 2입니다.<br><br>앵커볼트 <code>М30</code>으로, 펌프측 요구 M36과의 차이가 그대로입니다."}, {"n": "R12", "st": "신규", "k": "n", "t": "전동기 Y500-8 정격 2종", "cam": [5.364, 7, 16, 30], "d": "같은 <code>Y500-8</code> 전동기가 로후르-1에서 <b>560 kW</b>, 로후르-3에서 <b>640 kW</b>로 기입돼 있습니다. 모델이 같으면 정격도 같아야 합니다.<br><br>이 개소는 <b>640 kW</b>입니다."}, {"n": "R13", "st": "미해소", "k": "n", "t": "철거 중량 4개소 동일", "cam": [-4, 9, 30, 42], "d": "<code>26298,0 / 19500,0 / 4960,0 / 3350,0</code> — 2026-08 및 타 개소와 동일합니다. 개소별 실측이 반영되지 않았습니다."}, {"sec": "D. 도면집 구성"}, {"n": "R14", "st": "신규", "k": "n", "t": "«АС» 앨범 16장 = 양수장 2장 + 변전소 8장", "cam": [-12, 10, 22, 40], "d": "АС 앨범은 두 앨범이 합본돼 있습니다.<br>· 1~8장 양수장 — 그중 <b>실제 도면은 리스트7(지붕 평면) · 리스트8(단면) 2장뿐</b><br>· 9~16장 변전소 — 9장에 표1이 다시 시작<br><br><b>양수장 본체의 평면도·입면도·기초도가 없습니다.</b> 건축↔기계 정합 검증이 불가능합니다."}, {"n": "R15", "st": "미해소", "k": "n", "t": "부속 앨범 4개소 공용", "cam": [0, 14, 34, 46], "d": "당직실 13장과 화장실 7장은 4개 개소가 사실상 동일합니다(리스트4·5·7·8·9·10·11·13 해밍거리 0). 전실도 리스트6·7이 거리 0입니다.<br><br>개소별 부지 조건(전실 <code>7,0 × 57,0 m</code>)이 반영되지 않았습니다."}, {"n": "R16", "st": "미해소", "k": "n", "t": "벡터 CAD 미제출", "cam": [0, 12, 34, 46], "d": "보완본 5개 앨범 61장 전부 래스터입니다(<code>get_drawings() = 0</code>). 텍스트 레이어는 있으나 치수값은 포함되지 않습니다.<br><br>함께 받은 간략설명서는 <b>벡터</b>로 출력돼 있어, 설계사가 벡터 출력이 가능함을 보여줍니다."}];
+var LAYERS = [
+  {id:"main",  nm:"양수장 17.88×5.40", c:"#23272e", on:true},
+  {id:"brief", nm:"부지 조서 6,0 × 47,0 m", c:"#d42a2a", on:true},
+  {id:"pump",  nm:"펌프 4대 · 기초",    c:"#0f8f7a", on:true},
+  {id:"suct",  nm:"흡입관 Ø1000 (4계열)",    c:"#1f5fd0", on:true},
+  {id:"disc",  nm:"압송관 D600 → D1000",    c:"#c02a8f", on:true},
+  {id:"avan",  nm:"전실 7,0 × 57,0 m",      c:"#6f6a5e", on:true},
+  {id:"sub",   nm:"변전소 6,70 × 15,0 m",     c:"#8a5cd6", on:false},
+  {id:"datum", nm:"표고 충돌 평면",      c:"#d9822b", on:false}
+];
+var MODES = [
+  {id:"plan", nm:"평면도 기준"},
+  {id:"both", nm:"조서 치수 중첩"},
+  {id:"sect", nm:"단면"},
+  {id:"dat",  nm:"표고 충돌"}
+];
+var STATE = {mode:"plan", lay:{}, cut:1, ev:null};
+LAYERS.forEach(function(l){ STATE.lay[l.id]=l.on; });
+
+(function(){
+  var mb=document.getElementById('modeBar');
+  MODES.forEach(function(m){
+    var b=document.createElement('button');
+    b.textContent=m.nm; b.dataset.m=m.id;
+    if(m.id===STATE.mode) b.className='on';
+    b.onclick=function(){ setMode(m.id); };
+    mb.appendChild(b);
+  });
+  var ec=document.getElementById('evs');
+  EV.forEach(function(e,i){
+    var d=document.createElement('div');
+    d.className='ev'+(e.warn?' warn':'');
+    d.innerHTML='<span class="v">'+e.lab+'</span><span class="l">'+e.src+'</span>';
+    d.onclick=function(){
+      STATE.ev=(STATE.ev===i?null:i);
+      [].forEach.call(ec.children,function(c,j){
+        c.className=c.className.replace(/ on\b/,'')+(j===STATE.ev?' on':''); });
+      if(VIEW) VIEW.plane(STATE.ev===null?null:e);
+    };
+    ec.appendChild(d);
+  });
+  var lc=document.getElementById('lays');
+  LAYERS.forEach(function(l){
+    var w=document.createElement('label'); w.className='lay';
+    var cb=document.createElement('input'); cb.type='checkbox'; cb.checked=l.on;
+    var sw=document.createElement('span'); sw.className='sw'; sw.style.background=l.c;
+    var tx=document.createElement('span'); tx.textContent=l.nm;
+    cb.onchange=function(){ STATE.lay[l.id]=cb.checked; if(VIEW) VIEW.sync(); };
+    w.appendChild(cb); w.appendChild(sw); w.appendChild(tx); lc.appendChild(w);
+  });
+  document.getElementById('cut').oninput=function(){
+    STATE.cut=this.value/100; if(VIEW) VIEW.cut(STATE.cut); };
+  var ic=document.getElementById('issues');
+  ISSUES.forEach(function(o){
+    if(o.sec){ var g=document.createElement('div'); g.className='grp'; g.textContent=o.sec; ic.appendChild(g); return; }
+    var d=document.createElement('div'); d.className='iss '+o.k;
+    d.innerHTML='<div class="hd"><span class="no">'+o.n+'</span><span class="t">'+o.t+'</span>'
+      +'<span class="st">'+o.st+'</span></div><div class="bd">'+o.d+'</div>';
+    d.onclick=function(){
+      var open=d.className.indexOf('open')>=0;
+      [].forEach.call(ic.querySelectorAll('.iss'),function(x){x.className=x.className.replace(/ open\b/,'');});
+      if(!open){ d.className+=' open'; if(VIEW&&o.cam) VIEW.fly(o.cam); }
+    };
+    ic.appendChild(d);
+  });
+})();
+
+function setMode(m){
+  STATE.mode=m;
+  [].forEach.call(document.getElementById('modeBar').children,function(b){
+    b.className=(b.dataset.m===m)?'on':''; });
+  var set={
+    plan:{main:1,brief:0,pump:1,suct:1,disc:1,avan:1,sub:0,datum:0},
+    both:{main:1,brief:1,pump:1,suct:0,disc:0,avan:1,sub:1,datum:0},
+    sect:{main:1,brief:0,pump:1,suct:1,disc:1,avan:0,sub:0,datum:0},
+    dat: {main:1,brief:0,pump:0,suct:0,disc:0,avan:0,sub:1,datum:1}
+  }[m];
+  LAYERS.forEach(function(l){ STATE.lay[l.id]=!!set[l.id]; });
+  [].forEach.call(document.getElementById('lays').children,function(w,i){
+    w.firstChild.checked=STATE.lay[LAYERS[i].id]; });
+  if(m==='sect'){ STATE.cut=.5; document.getElementById('cut').value=50; }
+  else { STATE.cut=1; document.getElementById('cut').value=100; }
+  if(VIEW){ VIEW.sync(); VIEW.cut(STATE.cut); }
+}
+</script>
+
+<script src="../assets/three.min.js"></script>
+
+<script>
+/* ═══ C. 3D 장면 ═════════════════════════════════════════════
+   X = 종방향(축①→②) / Z = 횡방향 / Y = 표고. 단위 m.
+   0 = ТХ 양수장 평면도 ±0.000.                                */
+(function(){
+try{
+  var host=document.getElementById('mid');
+  var W=host.clientWidth||800, H=host.clientHeight||600;
+  var scene=new THREE.Scene(); scene.background=new THREE.Color(0xe8e5dd);
+  var camera=new THREE.PerspectiveCamera(42, W/H, .5, 2000);
+  var renderer=new THREE.WebGLRenderer({antialias:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  renderer.setSize(W,H); renderer.localClippingEnabled=true;
+  host.insertBefore(renderer.domElement, host.firstChild);
+  scene.add(new THREE.AmbientLight(0xffffff,.72));
+  var dl=new THREE.DirectionalLight(0xffffff,.55); dl.position.set(30,50,25); scene.add(dl);
+  var dl2=new THREE.DirectionalLight(0xffffff,.25); dl2.position.set(-25,20,-20); scene.add(dl2);
+
+  var P = SITE;                       // 평면도 판독값
+  var N = {
+    L:P.planL, W:P.planW, floor:-2.60, eave:5.20, ridge:7.30, wall:.40,
+    seg:P.segs, inner:[3.0,11.15,2.93], crossSeg:[1.65,3.0,1.65],
+    pump:[4.50,7.50,10.50,13.50], axisZ:2.70
+  };
+  var G={}; LAYERS.forEach(function(l){ G[l.id]=new THREE.Group(); scene.add(G[l.id]); });
+  var clip=new THREE.Plane(new THREE.Vector3(-1,0,0),100);
+  renderer.clippingPlanes=[clip];
+
+  function mat(c,o,side){
+    return new THREE.MeshLambertMaterial({color:c,transparent:o<1,opacity:o,
+      depthWrite:o>=.7, side:side||THREE.FrontSide, clippingPlanes:[clip]});
+  }
+  function line(c,o){
+    return new THREE.LineBasicMaterial({color:c,transparent:o<1,
+      opacity:o===undefined?1:o, clippingPlanes:[clip]});
+  }
+  function box(w,h,d,x,y,z,m,g,ec){
+    var b=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m); b.position.set(x,y,z); g.add(b);
+    var e=new THREE.LineSegments(new THREE.EdgesGeometry(b.geometry), line(ec===undefined?0x23272e:ec,.5));
+    e.position.copy(b.position); g.add(e); return b;
+  }
+  function pipe(r,len,x,y,z,rot,m,g){
+    var p=new THREE.Mesh(new THREE.CylinderGeometry(r,r,len,18,1,true),m);
+    p.position.set(x,y,z);
+    if(rot==='x') p.rotation.z=Math.PI/2;
+    if(rot==='z') p.rotation.x=Math.PI/2;
+    g.add(p); return p;
+  }
+
+  /* 양수장 본체 — ТХ 평면도 17.88 × 5.40 */
+  (function(){
+    var g=G['main'], m=mat(0xf4f2ec,.40,THREE.DoubleSide), hz=N.W/2, hw=N.eave-N.floor;
+    box(N.L,.3,N.W, N.L/2, N.floor-.15, 0, mat(0xd8d4c8,.9), g);
+    box(N.L,hw,N.wall, N.L/2, N.floor+hw/2, -hz, m, g);
+    box(N.L,hw,N.wall, N.L/2, N.floor+hw/2,  hz, m, g);
+    box(N.wall,hw,N.W, 0,   N.floor+hw/2, 0, m, g);
+    box(N.wall,hw,N.W, N.L, N.floor+hw/2, 0, m, g);
+    var sh=new THREE.Shape();
+    sh.moveTo(-hz,0); sh.lineTo(hz,0); sh.lineTo(0,N.ridge-N.eave); sh.lineTo(-hz,0);
+    var roof=new THREE.Mesh(new THREE.ExtrudeGeometry(sh,{depth:N.L,bevelEnabled:false}),
+      mat(0x8c8678,.58,THREE.DoubleSide));
+    roof.rotation.y=Math.PI/2; roof.position.set(0,N.eave,0); g.add(roof);
+    [0,N.L].forEach(function(x){
+      g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(
+        [new THREE.Vector3(x,N.floor,-hz-1.2), new THREE.Vector3(x,N.floor,hz+1.2)]), line(0xd42a2a,.8)));
+    });
+    // 내부 구획 3000 / 11150 / 2930 (합 17 080 — 800 부족)
+    var ix=0;
+    N.inner.forEach(function(w,i){
+      ix+=w;
+      if(i<N.inner.length-1)
+        g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(
+          [new THREE.Vector3(ix,N.floor,-hz), new THREE.Vector3(ix,N.floor,hz)]), line(0x1f5fd0,.7)));
+    });
+    // 구획합 끝점 (17.08) 표시 — 총치수와 벌어지는 지점
+    g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(
+      [new THREE.Vector3(ix,N.floor,-hz-.6), new THREE.Vector3(ix,N.eave,-hz-.6)]), line(0xd9822b,.9)));
+  })();
+
+  /* 부지 조서 치수 (중첩 비교용) */
+  (function(){
+    var g=G['brief'], bl=SITE.briefL, bw=SITE.briefW, h=3.5;
+    var e=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(bl,h,bw)), line(0xd42a2a,.85));
+    e.position.set(bl/2, N.floor+h/2, 0); g.add(e);
+    var b=new THREE.Mesh(new THREE.BoxGeometry(bl,h,bw), mat(0xd42a2a,.08,THREE.DoubleSide));
+    b.position.copy(e.position); g.add(b);
+  })();
+
+  /* 펌프 · 기초 */
+  (function(){
+    var g=G['pump'], fl=4.565, fw=2.0, fh=.6;
+    N.pump.forEach(function(x,i){
+      var big = i < (SITE.bigN||4);
+      box(fl,fh,fw, x, N.floor+fh/2, N.W/2-N.axisZ, mat(0x9a9588,.92), g);
+      box(big?2.0:1.3, big?1.5:1.0, big?1.3:.9, x-1.5,
+          N.floor+fh+(big?.75:.5), N.W/2-N.axisZ, mat(0x0f8f7a,.85), g);
+      var r=big?.72:.48;
+      var c=new THREE.Mesh(new THREE.CylinderGeometry(r,r,1.3,20), mat(0x13a88f,.9));
+      c.rotation.z=Math.PI/2; c.position.set(x+.6, N.floor+fh+r, N.W/2-N.axisZ); g.add(c);
+    });
+  })();
+
+  /* 흡입관 Ø1000 · 압송관 D600→D1000 */
+  (function(){
+    var gs=G['suct'], gd=G['disc'], ms=mat(0x1f5fd0,.72), md=mat(0xc02a8f,.72);
+    var y=N.floor+1.0;
+    N.pump.forEach(function(x){
+      pipe(.50, 9.0, x, y, -N.W/2-4.5, 'z', ms, gs);
+      pipe(.30, 4.6, x, y,  N.W/2+1.0, 'z', md, gd);
+    });
+    [0,1].forEach(function(k){
+      var p=new THREE.Mesh(new THREE.CylinderGeometry(.50,.50,N.L*.52,18,1,true), md);
+      p.rotation.z=Math.PI/2;
+      p.position.set(N.L*(k?.70:.28), y-.3, N.W/2+2.8+k*1.7);
+      gd.add(p);
+    });
+  })();
+
+  /* 전실 — 개소별 실치수 */
+  (function(){
+    var g=G['avan'], m=mat(0x6f6a5e,.16,THREE.DoubleSide);
+    var al=SITE.avanL, aw=SITE.avanW;
+    box(al,3.0,aw, N.L/2, N.floor+1.5, -N.W/2-aw/2-2.5, m, g, 0x6f6a5e);
+  })();
+
+  /* 변전소 6.70 × 15.0 — ±0.00 (733,04) 계열 */
+  (function(){
+    var g=G['sub'], m=mat(0x8a5cd6,.16,THREE.DoubleSide);
+    box(15.0,6.0,6.7, N.L/2, N.floor+3.0, N.W/2+12.0, m, g, 0x8a5cd6);
+  })();
+
+  /* 표고 충돌 평면 */
+  (function(){
+    var g=G['datum'];
+    [{y:0,     c:0xd9822b},
+     {y:-1.9,  c:0xd42a2a}].forEach(function(o){
+      var p=new THREE.Mesh(new THREE.PlaneGeometry(44,30), mat(o.c,.10,THREE.DoubleSide));
+      p.rotation.x=-Math.PI/2; p.position.set(N.L/2,o.y,0); g.add(p);
+      var e=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.PlaneGeometry(44,30)), line(o.c,.8));
+      e.rotation.x=-Math.PI/2; e.position.copy(p.position); g.add(e);
+    });
+  })();
+
+  var LAB=[
+    {p:new THREE.Vector3(N.L/2, N.ridge+.5, 0), t:'용마루 +7.30', lay:'main'},
+    {p:new THREE.Vector3(N.L/2, N.eave+.35, -N.W/2), t:'처마 +5.20', lay:'main'},
+    {p:new THREE.Vector3(-2.4, .9, N.W/2), t:'±0.000  582.22', lay:'main'},
+    {p:new THREE.Vector3(-2.0, N.floor, N.W/2), t:'-2.60 (579.62)', lay:'main'},
+    {p:new THREE.Vector3(N.L/2, N.floor-.9, 0), t:'17 880 (구획합 17 080)', lay:'main'},
+    {p:new THREE.Vector3(N.L+1.3, N.floor-.4, 0), t:'축 ②', lay:'main'},
+    {p:new THREE.Vector3(-1.3, N.floor-.4, 0), t:'축 ①', lay:'main'},
+    {p:new THREE.Vector3(SITE.briefL/2, N.floor+3.8, SITE.briefW/2), t:'조서 6,0 × 47,0 m', lay:'brief'},
+    {p:new THREE.Vector3(N.L/2, N.floor+3.2, -N.W/2-SITE.avanW/2-2.5), t:'전실 7,0 × 57,0 m', lay:'avan'},
+    {p:new THREE.Vector3(N.L/2, N.floor+6.4, N.W/2+12.0), t:'변전소 ±0.00 733.04', lay:'sub'}
+  ];
+  var labHost=document.getElementById('lab');
+  LAB.forEach(function(o){ var d=document.createElement('div'); d.textContent=o.t; labHost.appendChild(d); o.el=d; });
+
+  var tgt=new THREE.Vector3(N.L/2,1.2,0), sph={r:46,th:.92,ph:1.02};
+  function place(){
+    camera.position.set(tgt.x+sph.r*Math.sin(sph.ph)*Math.cos(sph.th),
+                        tgt.y+sph.r*Math.cos(sph.ph),
+                        tgt.z+sph.r*Math.sin(sph.ph)*Math.sin(sph.th));
+    camera.lookAt(tgt);
+  }
+  place();
+  var drag=false,px=0,py=0,el=renderer.domElement;
+  el.style.touchAction='none';
+  el.addEventListener('pointerdown',function(e){drag=true;px=e.clientX;py=e.clientY;el.setPointerCapture(e.pointerId);});
+  el.addEventListener('pointerup',function(){drag=false;});
+  el.addEventListener('pointermove',function(e){
+    if(!drag) return;
+    sph.th-=(e.clientX-px)*.006;
+    sph.ph=Math.max(.12,Math.min(1.56,sph.ph-(e.clientY-py)*.005));
+    px=e.clientX; py=e.clientY; place();
+  });
+  el.addEventListener('wheel',function(e){
+    e.preventDefault();
+    sph.r=Math.max(10,Math.min(130,sph.r*(1+(e.deltaY>0?.1:-.1)))); place();
+  },{passive:false});
+
+  function sync(){ LAYERS.forEach(function(l){ G[l.id].visible=!!STATE.lay[l.id]; }); }
+  function cut(f){ clip.constant=-2+(N.L+6)*f; }
+  function fly(c){ tgt.set(c[0],c[1],c[2]); sph.r=c[3]; place(); }
+  function plane(e){ G['datum'].visible=!!e||STATE.lay['datum']; }
+  VIEW={sync:sync,cut:cut,fly:fly,plane:plane};
+  setMode(STATE.mode);
+
+  window.addEventListener('resize',function(){
+    W=host.clientWidth; H=host.clientHeight;
+    if(!W||!H) return;
+    camera.aspect=W/H; camera.updateProjectionMatrix(); renderer.setSize(W,H);
+  });
+
+  var v=new THREE.Vector3();
+  function loop(){
+    requestAnimationFrame(loop);
+    renderer.render(scene,camera);
+    LAB.forEach(function(o){
+      v.copy(o.p).project(camera);
+      var vis=v.z<1&&v.x>-1.05&&v.x<1.05&&v.y>-1.05&&v.y<1.05&&(!o.lay||STATE.lay[o.lay]);
+      o.el.dataset.hide=vis?'0':'1';
+      if(vis){ o.el.style.left=((v.x*.5+.5)*W)+'px'; o.el.style.top=((-v.y*.5+.5)*H)+'px'; }
+    });
+  }
+  loop();
+}catch(err){
+  var e=document.getElementById('err');
+  e.style.display='flex';
+  e.innerHTML='3D 화면을 띄우지 못했습니다.<br>좌측 표고 스택과 우측 검토 결과는 그대로 사용할 수 있습니다.<br>'
+    +'<span style="font-size:11px;opacity:.7">'+String(err&&err.message||err)+'</span>';
+}
+})();
+</script>
+</body></html>
